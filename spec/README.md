@@ -158,7 +158,7 @@ Historical flat `version: "0.1"` Intent manifests are rejected with an explicit 
 
 ## Open specification questions
 
-Dogfood should drive these; do not freeze them prematurely. Sequencing and ownership for near-term external dogfood and conditional protocol evaluation live in [ROADMAP.md](../ROADMAP.md)—do not duplicate that plan here.
+Dogfood should drive these; do not freeze them prematurely. Sequencing and ownership for near-term external dogfood and completed protocol evaluation live in [ROADMAP.md](../ROADMAP.md)—do not duplicate that plan here.
 
 1. **Grant / lease model** — Today results are largely credential **material** (env maps). Future capabilities (ephemeral databases, temporary queues/storage, cloud roles) may need a broader grant/lease result model. There is no Grant Specification yet. See [ROADMAP.md](../ROADMAP.md) (Material vs Grant; deferred). Portable Endpoint Intent schema is **retired** from the active roadmap—reopen only if independent dogfood shows a generic need.
 2. **Derived / session-scoped materialization** — Brokers may fulfill a capability by deriving short-lived credentials from durable authority via independently implemented providers (or, later, mediating without returning credentials). Required for `v0.1.0` alongside direct materialization, demonstrated by **two non-normative reference providers** on the same generic seam: GitHub App (first) and Google service-account OAuth (second **architectural test**—not vendor breadth or GA product support). Neither provider is part of the normative PADE protocol. See [ROADMAP.md](../ROADMAP.md#why-two-derived-token-providers-before-v010) Milestones B–I.

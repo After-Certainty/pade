@@ -92,8 +92,8 @@ Derived from the repository as of this roadmap pass (reference Consumer/Broker c
 | `pade exec` | DONE | Process-scoped resolve → inject → wait → discard |
 | Child exit-code propagation | DONE | Maps to process exit |
 | Output redaction | DONE | Exact-match secret redaction on child stdout/stderr (defense in depth) |
-| Signal forwarding (SIGINT / SIGTERM → child) | MISSING | No explicit forward; evaluate in Milestone O only if real dogfood shows a generic `pade exec` gap |
-| Long-running child-process behavior | PARTIAL / UNKNOWN | Wait + stream works; process-group / signal behavior needs dogfood only if a generic gap appears |
+| Signal forwarding (SIGINT / SIGTERM → child) | MISSING | No explicit forward; Milestone O dogfood showed no generic `pade exec` gap — leave deferred until one appears |
+| Long-running child-process behavior | PARTIAL / UNKNOWN | Wait + stream works; Milestone O did not surface a generic process-group / signal gap |
 | Remote broker endpoint / audience configuration | DONE | Local bindings only (not in Intent) |
 | Containerized `pade-broker` | DONE | Root [`Dockerfile`](Dockerfile); `make smoke-broker-container` |
 | Cloud Run–compatible transport mode | DONE | `PORT` + `-tls-termination=proxy` |
@@ -108,10 +108,11 @@ Derived from the repository as of this roadmap pass (reference Consumer/Broker c
 | External vendor CLI dogfood (Vercel) | DONE | Cloud Agent consumer repo retrieved Vercel logs via generic Material from `pade-broker-deployment` (Milestone L). No Vercel in PADE core. |
 | Subject-bound authority (WIF experiment) | DONE | Optional broker-verified `identity` on trusted exec Request (`v0.1.1`); live A/B subject isolation via Google WIF + Secret Manager in `pade-broker-deployment` (Milestone M). No PADE user→secret mapping table. |
 | Full cloud-agent acceptance | DONE | Fresh Cursor iOS Cloud Agent (`source: IOS_APP`) against consumer repo; released `pade` + private broker; `github.repo.read`, `google-analytics.read`, `vercel.diagnostics` with no credentials copied onto the VM (Milestone N) |
+| Post-dogfood protocol evaluation | DONE | Only generic seam from L–N was M’s identity context (shipped in `v0.1.1`). No further Intent/Consumer/Broker work from dogfood (Milestone O) |
 
-**First versioned release (`v0.1.0`) is cut; `v0.1.1` adds the Milestone M identity-context seam.** Remaining planned work is **post-release** Milestone **O** only: conditional protocol evaluation (bring back only generic deficiencies). Preview-environment lifecycle is **not** currently a motivating PADE problem. Do **not** commit broker URLs into this repository.
+**First versioned release (`v0.1.0`) is cut; `v0.1.1` adds the Milestone M identity-context seam.** Post-release Milestones **J–O** are **DONE**. Further PADE changes only if new dogfood shows a **generic** deficiency. Preview-environment lifecycle is **not** currently a motivating PADE problem. Do **not** commit broker URLs into this repository.
 
-**Landed for B–N (including live external proofs):** semantic provider contract, **broker-only** `provider: exec` adapter, stub + GitHub App + Google service-account reference providers (fake CI + httptest-tested real derivation), two-provider same-seam dogfood through the broker, Stage B exec dogfood (`make dogfood-broker-stage-b-exec`), live Cloud Agent E2E against a private Cloud Run broker for both derived-token capabilities, versioned `v0.1.0` / `v0.1.1` artifacts, released GHCR broker image consumed by `pade-broker-deployment`, released CLI consumed by a real external dogfood repository, **external Vercel log retrieval through generic Material** (no Vercel in PADE), **subject-bound Material via downstream WIF/IAM** (same portable capability → different secrets by subject; no PADE user→secret table), and **full cloud-agent acceptance from Cursor iOS** (no manual credential copy). Targets: `make dogfood-exec-provider{,-github,-ga,-two}`, `make dogfood-broker-stage-b-exec`.
+**Landed for B–O (including live external proofs):** semantic provider contract, **broker-only** `provider: exec` adapter, stub + GitHub App + Google service-account reference providers (fake CI + httptest-tested real derivation), two-provider same-seam dogfood through the broker, Stage B exec dogfood (`make dogfood-broker-stage-b-exec`), live Cloud Agent E2E against a private Cloud Run broker for both derived-token capabilities, versioned `v0.1.0` / `v0.1.1` artifacts, released GHCR broker image consumed by `pade-broker-deployment`, released CLI consumed by a real external dogfood repository, **external Vercel log retrieval through generic Material** (no Vercel in PADE), **subject-bound Material via downstream WIF/IAM** (same portable capability → different secrets by subject; no PADE user→secret table), **full cloud-agent acceptance from Cursor iOS** (no manual credential copy), and **post-dogfood protocol evaluation** (no further PADE protocol work beyond M’s identity seam). Targets: `make dogfood-exec-provider{,-github,-ga,-two}`, `make dogfood-broker-stage-b-exec`.
 
 ### Security narrowing: exec is broker-side only
 
@@ -318,7 +319,7 @@ The provider mechanism is a **semantic fulfill/derive contract**, not an arbitra
 
 ### PADE repository (this repo)
 
-Landed through `v0.1.0` (Milestones A–I in this repo) and post-release J–N (external):
+Landed through `v0.1.0` (Milestones A–I in this repo) and post-release J–O (external + evaluation):
 
 - Keep PAT direct-materialization broker dogfood healthy as stage-1 baseline (Milestone A)
 - Define minimal generic provider contract + dogfood binding (Milestones B–C)
@@ -327,7 +328,7 @@ Landed through `v0.1.0` (Milestones A–I in this repo) and post-release J–N (
 - Two-provider same-seam architectural test (Milestone G)
 - Spec/docs tighten + versioned CLI/broker release (Milestones H–I)
 
-Post-release (this repo only if dogfood shows a generic gap): Milestone O.
+Post-release evaluation (Milestone O) is **DONE**: further PADE work only if new dogfood shows a generic gap.
 
 PADE should **not** put into core:
 
@@ -339,7 +340,7 @@ PADE should **not** put into core:
 - Preview-environment / tunnel lifecycle (not currently a motivating PADE problem)
 - A catalog of vendor integrations
 
-In-tree reference providers under `examples/providers/` exist for **dogfooding and illustrating the provider contract**. They are **non-normative** and **architecturally removable** from PADE core. Their presence does **not** make the vendor, API, or capability part of the PADE standard. Prefer `examples/providers/` over an `extensions/` directory name (avoids collision with CNCF Runtime Conditions “extension” terminology). Post-v0.1 external integrations (Milestones L–N, **DONE**, and later) should prefer **deployment/operator configuration outside this repository**, not new in-tree vendors.
+In-tree reference providers under `examples/providers/` exist for **dogfooding and illustrating the provider contract**. They are **non-normative** and **architecturally removable** from PADE core. Their presence does **not** make the vendor, API, or capability part of the PADE standard. Prefer `examples/providers/` over an `extensions/` directory name (avoids collision with CNCF Runtime Conditions “extension” terminology). Post-v0.1 external integrations (Milestones L–N, **DONE**) and protocol evaluation (Milestone O, **DONE**) prefer **deployment/operator configuration outside this repository**, not new in-tree vendors.
 
 ### `pade-broker-deployment` (external)
 
@@ -462,7 +463,7 @@ Previous letters after PR #31 (GA-first A–M) and the post-`v0.1.0` Cloudflare/
 | **L — External CLI authority dogfood** | Real vendor CLI (Vercel as concrete dogfood) via generic Material; no Vercel in PADE | Broker deployment + consumer repository — **DONE** (Vercel logs from a Cloud Agent) |
 | **M — Subject-bound authority (WIF experiment)** | Same portable capability → different Material by subject via downstream IAM | Broker deployment + external identity/IAM — **DONE** (`v0.1.1` identity seam + live WIF A/B) |
 | **N — Full cloud-agent acceptance** | End-to-end cloud-agent workflow without manual credential copy | External acceptance — **DONE** (Cursor iOS Cloud Agent; GitHub + GA + Vercel) |
-| **O — Post-dogfood protocol evaluation** | Only generic deficiencies return to PADE | Conditional |
+| **O — Post-dogfood protocol evaluation** | Only generic deficiencies return to PADE | Evaluation — **DONE** (only M’s identity seam; no further protocol work) |
 
 ```text
 A (PAT direct Material baseline)
@@ -511,7 +512,7 @@ full cloud-agent acceptance/dogfood
 bring back only generic deficiencies
 ```
 
-The Google reference provider must **not** become an excuse to keep building vendor examples inside PADE. Real product and vendor-CLI dogfood belongs in external repos / broker deployment configuration after released artifacts exist (Milestones J–N; J–N **DONE**).
+The Google reference provider must **not** become an excuse to keep building vendor examples inside PADE. Real product and vendor-CLI dogfood belongs in external repos / broker deployment configuration after released artifacts exist (Milestones J–N **DONE**; evaluation O **DONE**).
 
 ### Milestone A — Broker dogfood baseline
 
@@ -724,7 +725,7 @@ Do **not** redesign DevelopmentSession / Intent around Runtime Conditions or inv
 - The second provider exists to prove the seam is not GitHub-App-shaped—not to expand PADE’s integration catalog
 - See [Why two derived-token providers before v0.1.0](#why-two-derived-token-providers-before-v010) for release-gate and security rationale
 
-**Not required for `v0.1.0`:** mediated capabilities (stage 3); full provider ecosystem; every future binding; Intent redesign; Runtime Conditions integration; post-release Milestones M–O. Pinning released CLI/broker artifacts in external deploy was **J–K** (now DONE). External vendor CLI dogfood is **L** (now DONE). Subject-bound WIF dogfood is **M** (now DONE). Full cloud-agent acceptance is **N** (now DONE).
+**Not required for `v0.1.0`:** mediated capabilities (stage 3); full provider ecosystem; every future binding; Intent redesign; Runtime Conditions integration; post-release Milestones M–O. Pinning released CLI/broker artifacts in external deploy was **J–K** (now DONE). External vendor CLI dogfood is **L** (now DONE). Subject-bound WIF dogfood is **M** (now DONE). Full cloud-agent acceptance is **N** (now DONE). Post-dogfood protocol evaluation is **O** (now DONE).
 
 #### Release artifacts (landed at I)
 
@@ -960,6 +961,8 @@ PADE core remains unaware of the downstream vendors. Preview-environment / tunne
 
 ### Milestone O — Post-dogfood protocol evaluation
 
+**Status:** DONE.
+
 Only **generic** deficiencies discovered during real use (especially Milestones L, M, and N) return to the PADE repository (Intent, Consumer, Broker, or reference execution behavior). Vendor-specific work stays in broker deployment configuration, consumer repositories, or—only when still serving as an architectural test—`examples/providers/`.
 
 Apply the generic-deficiency rule explicitly:
@@ -970,6 +973,18 @@ Apply the generic-deficiency rule explicitly:
 | Subject-bound WIF dogfood (M) | Downstream IAM can solve it → no PADE change |
 | Full cloud-agent acceptance (N) | Vendor / consumer smoke gaps → solve outside PADE |
 | Any of the above | Only a demonstrated generic missing seam → PADE may evolve |
+
+**Conclusion (L–N evaluated):**
+
+| Finding | Classification | Outcome |
+|---------|----------------|---------|
+| L: Vercel CLI via generic Material | Outside PADE | No PADE change |
+| M: broker did not forward verified identity to trusted exec | **Generic deficiency** | Smallest seam shipped in [`v0.1.1`](https://github.com/After-Certainty/pade/releases/tag/v0.1.1) (optional exec Request `identity`); live WIF A/B completed externally |
+| N: consumer smoke omits `github.repo.read` | Consumer repository | Optional follow-up outside PADE |
+| N: redaction may leave a short token prefix | Known defense-in-depth limit | Documented; not a protocol change |
+| Signal forwarding / long-running child process | Not surfaced as a dogfood gap | Remain deferred (MISSING / UNKNOWN) |
+
+**No further Intent, Consumer, or Broker protocol work** is warranted from Milestones L–N beyond what Milestone M already shipped. Future PADE changes still require a demonstrated **generic** deficiency.
 
 ## Capability naming (exploratory)
 

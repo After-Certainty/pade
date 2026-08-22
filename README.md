@@ -280,7 +280,7 @@ Workspace lifecycle: prefer `devpod up` / `devpod stop` directly. See [examples/
 
 ## Roadmap
 
-**Authoritative forward plan:** [ROADMAP.md](ROADMAP.md) — before `v0.1.0`, two **non-normative reference providers** prove stage-2 broker-side credential derivation on the same generic seam (GitHub App first; Google service-account OAuth second as a **structural** test, not Google Analytics product support). After released artifacts: external vendor CLI dogfood (**L**), subject-bound WIF (**M**), and **full cloud-agent acceptance from Cursor iOS** (**N**) are **done**. Remaining: bring back only generic deficiencies (Milestone **O**). Preview-environment lifecycle is not currently a motivating PADE problem. See [Why two derived-token providers before v0.1.0](ROADMAP.md#why-two-derived-token-providers-before-v010).
+**Authoritative forward plan:** [ROADMAP.md](ROADMAP.md) — before `v0.1.0`, two **non-normative reference providers** prove stage-2 broker-side credential derivation on the same generic seam (GitHub App first; Google service-account OAuth second as a **structural** test, not Google Analytics product support). Post-release Milestones **J–O** are **done** (released deploy/consumer dogfood, external Vercel CLI, subject-bound WIF, Cursor iOS acceptance, and protocol evaluation). The only generic seam from that dogfood was Milestone M’s identity context (`v0.1.1`); no further PADE protocol work from L–N. Further changes only if new dogfood shows a generic deficiency. Preview-environment lifecycle is not currently a motivating PADE problem. See [Why two derived-token providers before v0.1.0](ROADMAP.md#why-two-derived-token-providers-before-v010).
 
 ### Historical dogfood milestones
 
