@@ -74,10 +74,16 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 	return mat, nil
 }
 
+type identityPayload struct {
+	Subject string `json:"subject,omitempty"`
+	IDToken string `json:"idToken"`
+}
+
 type request struct {
-	Capability string         `json:"capability"`
-	Operation  string         `json:"operation"`
-	Config     map[string]any `json:"config,omitempty"`
+	Capability string           `json:"capability"`
+	Operation  string           `json:"operation"`
+	Config     map[string]any   `json:"config,omitempty"`
+	Identity   *identityPayload `json:"identity,omitempty"`
 }
 
 type response struct {
@@ -114,11 +120,18 @@ func requireExec(b binding.CapabilityBinding) error {
 }
 
 func (p *Provider) invoke(ctx context.Context, capability, operation string, eb *binding.ExecBinding) (*response, error) {
-	payload, err := json.Marshal(request{
+	req := request{
 		Capability: capability,
 		Operation:  operation,
 		Config:     eb.Config,
-	})
+	}
+	if id, ok := binding.VerifiedIdentityFrom(ctx); ok {
+		req.Identity = &identityPayload{
+			Subject: id.Subject,
+			IDToken: id.IDToken,
+		}
+	}
+	payload, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("encode provider request: %w", err)
 	}

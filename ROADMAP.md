@@ -858,7 +858,7 @@ This milestone proved that a real external integration can exist **without** bec
 
 ### Milestone M — Subject-bound authority (Google WIF experiment)
 
-**Status:** Not started (next post-release milestone).
+**Status:** In progress (generic seam landed in PADE; live A/B dogfood remains in `pade-broker-deployment` after a broker image pin). **Not DONE** until deployment-side WIF A/B validation completes.
 
 **Goal:** Investigate whether the **same portable PADE capability** can resolve to **different** authority according to the authenticated workload subject, while **downstream IAM**—not a PADE-maintained user-to-secret database—enforces isolation.
 
@@ -904,14 +904,18 @@ different secret/material authorized for subject B
 
 Preserve **shared organizational authority** as a valid model. Do not rewrite PADE as if every capability must become user-specific. Milestone M asks whether the **subject-bound** model can be composed from existing identity/IAM systems without expanding PADE unnecessarily.
 
-**Do not change the provider contract in this roadmap pass.** The experiment may reveal that the current seam does or does not expose enough broker-verified workload identity context for a trusted provider to perform an identity exchange.
+**Finding (acceptance branch No):** deployment analysis showed the pre-`v0.1.1` exec Request (`capability` / `operation` / `config` only) was insufficient for subject-bound WIF: the broker verified the Cursor OIDC JWT at `/v1/resolve` but did not forward broker-verified identity to trusted exec providers, so every subject shared the broker runtime principal. That is a **generic** deficiency (design question **#17**)—not a Vercel/GCP/WIF protocol concept.
+
+**PADE seam (smallest generic fix):** after successful OIDC verify + authorize, broker-side `provider: exec` Request JSON may include optional `identity` with `subject` and `idToken` (exact presented bearer). Documented in [`docs/provider-contract.md`](docs/provider-contract.md). Vendor WIF / Secret Manager / per-subject IAM stay in `pade-broker-deployment`. Shared organizational Material (Milestone L) remains unchanged when providers ignore `identity`.
+
+**Still required for Milestone M DONE:** cut a versioned broker release (for example `v0.1.1`), pin the GHCR digest in deployment, flip subject-bound fulfillment there, and complete live A/B validation. Do **not** mark M done in PADE on the seam alone.
 
 **Acceptance branches:**
 
 | Outcome | Action |
 |---------|--------|
 | **Yes** — existing provider contract is sufficient | **No PADE change.** Record that subject-aware fulfillment can be achieved by composing PADE with downstream IAM. |
-| **No** — a generic deficiency is demonstrated | Bring back only the **smallest generic** deficiency (for example, carefully scoped access to broker-verified workload identity context for a trusted provider). |
+| **No** — a generic deficiency is demonstrated | Bring back only the **smallest generic** deficiency (for example, carefully scoped access to broker-verified workload identity context for a trusted provider). **← current:** identity context seam shipped; live dogfood external. |
 
 Any future PADE change must be justified as a **generic provider requirement**, not a Google-, Cursor-, Vercel-, or Secret-Manager-specific feature.
 
@@ -987,7 +991,7 @@ Track these without freezing Intent or Broker wire formats prematurely.
 14. **Mediated capabilities** — Does credential-less exercise require Consumer protocol changes beyond today’s resolve → Material path?
 15. **Runtime Conditions (CNCF)** — Active discussion with Runtime Conditions maintainers. Emerging possibility: Runtime Conditions describe requirements of a runtime *thing* (application, Dev Container, code session, agent sandbox, development environment), while PADE creates/fulfills an identity-bound DevelopmentSession and handles downstream capability fulfillment. **Do not** claim adopt/extend/replace/integrate yet. **Do not** redesign Intent while this is open.
 16. **Hierarchical / composed profiles** — Emerging idea that development-session requirements could layer on top of application runtime requirements. Record only; no PADE schema work yet.
-17. **Broker-verified workload identity context for trusted providers** — Does a trusted external provider need carefully scoped access to broker-verified workload identity in order to perform downstream identity federation? **Do not answer in this planning pass.** Milestone M (WIF experiment) asks whether the existing provider contract is sufficient; only a demonstrated generic deficiency should return here.
+17. **Broker-verified workload identity context for trusted providers** — **Answered (Milestone M):** yes. Trusted broker-side exec providers need carefully scoped access to broker-verified workload identity (`subject` + exact presented `idToken`) to perform downstream identity federation (for example STS / WIF). Vendor WIF and Secret Manager wiring stay outside PADE; only the optional exec Request `identity` object is in-tree. See [`docs/provider-contract.md`](docs/provider-contract.md).
 18. **Capability vocabulary** — See [Capability naming](#capability-naming-exploratory).
 
 ## Deferred until after the initial release / full workflow

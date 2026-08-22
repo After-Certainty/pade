@@ -1,6 +1,6 @@
 # Releasing PADE (Milestone I)
 
-Pre-1.0 SemVer. Initial release: **[`v0.1.0`](https://github.com/ksteffe/pade/releases/tag/v0.1.0)** (2026-08-20). Releases are **manual only** — nothing publishes on merge to `main`.
+Pre-1.0 SemVer. Initial release: **[`v0.1.0`](https://github.com/ksteffe/pade/releases/tag/v0.1.0)** (2026-08-20). Next patch after the Milestone M identity-context seam: **`v0.1.1`** (additive optional `identity` on broker-side exec Request; backward compatible). Releases are **manual only** — nothing publishes on merge to `main`.
 
 ## Cut a release (GitHub Actions)
 
@@ -35,3 +35,9 @@ Development builds without `VERSION=…` report `dev` plus the current git short
 - **Broker:** `ghcr.io/ksteffe/pade-broker:vX.Y.Z` — no need to clone this repository on the broker host.
 
 See [ROADMAP.md](../ROADMAP.md) Milestone I (DONE) and post-release Milestones J–L (DONE) / M–O.
+
+### After merging the identity-context seam
+
+1. Ensure `main` is green.
+2. Actions → **Release** → **Run workflow** with `v0.1.1`.
+3. Prefer the uploaded broker image **digest** when pinning `pade-broker-deployment` (`versions.env` / image pin on branch `cursor/milestone-m-wif-setup-9f30`), then flip Vercel fulfillment to `subject-secret-wif` for live A/B validation.
