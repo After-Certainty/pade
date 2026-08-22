@@ -166,7 +166,7 @@ Dogfood should drive these; do not freeze them prematurely. Sequencing and owner
 4. **Capability vocabulary** — Naming, namespaces, registration, and third-party extension rules remain exploratory. There is no global capability registry in v0.1.
 5. **Broker discovery / configuration** — Today the reference consumer configures broker endpoint and audience via local bindings. Universal discovery is unspecified.
 6. **Workload identity catalog** — Cursor OIDC is the first reference adapter. GitHub Actions OIDC, SPIFFE, cloud workload identity, and enterprise mechanisms are possible later adapters, not standardized here.
-7. **Broker-verified workload identity context for trusted providers** — Whether a trusted external provider needs carefully scoped access to broker-verified workload identity for downstream federation is an open experiment question (see [ROADMAP.md](../ROADMAP.md) Milestone M). Do not change the provider contract until dogfood shows a generic deficiency.
+7. **Broker-verified workload identity context for trusted providers** — **Answered (Milestone M DONE):** trusted broker-side exec providers need carefully scoped access to broker-verified workload identity (`subject` + exact presented `idToken`) for downstream federation (for example STS / WIF). Optional exec Request `identity` is in [`docs/provider-contract.md`](../docs/provider-contract.md) and [`v0.1.1`](https://github.com/After-Certainty/pade/releases/tag/v0.1.1); vendor WIF / Secret Manager wiring stays outside PADE. See [ROADMAP.md](../ROADMAP.md) Milestone M.
 8. **Version negotiation** — Schema/protocol version fields and compatibility rules beyond fixed `pade.local/v1alpha1` remain future work. Legacy flat `version: "0.1"` Intent is not accepted.
 
 ## Normative language
