@@ -2,6 +2,7 @@ package exec
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	osexec "os/exec"
@@ -200,4 +201,91 @@ func buildStub(t *testing.T) string {
 		t.Fatalf("build stub: %v\n%s", err, outBytes)
 	}
 	return out
+}
+
+func TestExecForwardsVerifiedIdentity(t *testing.T) {
+	dir := t.TempDir()
+	dump := filepath.Join(dir, "request.json")
+	script := filepath.Join(dir, "dump.sh")
+	body := fmt.Sprintf(`#!/bin/sh
+cat > %q
+printf '{"env":{"DEMO_TOKEN":"ok"},"expiresAt":"2099-01-01T00:00:00Z"}'
+`, dump)
+	if err := os.WriteFile(script, []byte(body), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	b := binding.CapabilityBinding{
+		Provider: "exec",
+		Exec:     &binding.ExecBinding{Command: []string{script}},
+	}
+	ctx := binding.WithVerifiedIdentity(context.Background(), binding.VerifiedIdentity{
+		Subject: "user:42",
+		IDToken: "header.payload.sig",
+	})
+	mat, err := New().Resolve(ctx, "demo.derived", b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mat.Env["DEMO_TOKEN"] != "ok" {
+		t.Fatalf("env=%v", mat.Env)
+	}
+	raw, err := os.ReadFile(dump)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var req struct {
+		Capability string `json:"capability"`
+		Operation  string `json:"operation"`
+		Identity   *struct {
+			Subject string `json:"subject"`
+			IDToken string `json:"idToken"`
+		} `json:"identity"`
+	}
+	if err := json.Unmarshal(raw, &req); err != nil {
+		t.Fatalf("decode dumped request: %v\n%s", err, raw)
+	}
+	if req.Capability != "demo.derived" || req.Operation != "resolve" {
+		t.Fatalf("request=%+v", req)
+	}
+	if req.Identity == nil {
+		t.Fatalf("expected identity in request: %s", raw)
+	}
+	if req.Identity.Subject != "user:42" || req.Identity.IDToken != "header.payload.sig" {
+		t.Fatalf("identity=%+v", req.Identity)
+	}
+}
+
+func TestExecOmitsIdentityWithoutContext(t *testing.T) {
+	dir := t.TempDir()
+	dump := filepath.Join(dir, "request.json")
+	script := filepath.Join(dir, "dump.sh")
+	body := fmt.Sprintf(`#!/bin/sh
+cat > %q
+printf '{"status":"available"}'
+`, dump)
+	if err := os.WriteFile(script, []byte(body), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	b := binding.CapabilityBinding{
+		Provider: "exec",
+		Exec:     &binding.ExecBinding{Command: []string{script}},
+	}
+	probe, err := New().Probe(context.Background(), "demo.derived", b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if probe.Status != binding.ProbeAvailable {
+		t.Fatalf("probe status=%q", probe.Status)
+	}
+	raw, err := os.ReadFile(dump)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var req map[string]any
+	if err := json.Unmarshal(raw, &req); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := req["identity"]; ok {
+		t.Fatalf("identity must be omitted when absent: %s", raw)
+	}
 }

@@ -159,6 +159,13 @@ func (s *Server) handleResolve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Forward broker-verified workload identity to trusted providers (e.g. exec).
+	// Only after successful Verify + Authorize; never log the raw token.
+	ctx = binding.WithVerifiedIdentity(ctx, binding.VerifiedIdentity{
+		Subject: claims.Subject,
+		IDToken: token,
+	})
+
 	results, err := binding.ResolveMaterials(ctx, s.Registry, s.Bindings, []string{capability})
 	if err != nil {
 		if ctx.Err() != nil {

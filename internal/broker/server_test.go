@@ -655,3 +655,122 @@ capabilities:
 		t.Fatalf("oversized: status=%d body=%s", code, body)
 	}
 }
+
+
+func TestResolveForwardsVerifiedIdentityToExec(t *testing.T) {
+	dir := t.TempDir()
+	dump := filepath.Join(dir, "request.json")
+	script := filepath.Join(dir, "dump.sh")
+	scriptBody := fmt.Sprintf(`#!/bin/sh
+cat > %q
+printf '{"env":{"DEMO_TOKEN":"from-exec"},"expiresAt":"2099-01-01T00:00:00Z"}'
+`, dump)
+	if err := os.WriteFile(script, []byte(scriptBody), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	key := mustKey(t)
+	jwks := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(jwksFor(key, "test-kid"))
+	}))
+	t.Cleanup(jwks.Close)
+
+	policy, err := broker.ParsePolicy([]byte(`
+version: "0.1"
+oidc:
+  issuer: https://api.cursor.com
+  audience: https://pade-broker.local
+  jwksURL: ` + jwks.URL + `
+policies:
+  - subject: "user:42"
+    requireRepoURLs: true
+    repositories: ["github.com/ksteffe/pade"]
+    capabilities: ["demo.derived"]
+`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bindings, err := binding.Parse([]byte(fmt.Sprintf(`
+version: "0.1"
+capabilities:
+  demo.derived:
+    provider: exec
+    exec:
+      command: [%q]
+`, script)), "broker-bindings.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	srv := &broker.Server{
+		Policy: policy,
+		Verifier: &broker.Verifier{
+			Issuer:   testIssuer,
+			Audience: testAudience,
+			JWKSURL:  jwks.URL,
+			HTTPDo:   jwks.Client().Do,
+		},
+		Registry: providerset.Broker(),
+		Bindings: bindings,
+	}
+	hs := httptest.NewServer(srv.Handler())
+	t.Cleanup(hs.Close)
+
+	tok := mustSign(t, key, "test-kid", jwt.MapClaims{
+		"iss":            testIssuer,
+		"sub":            testSubject,
+		"aud":            testAudience,
+		"iat":            time.Now().Unix(),
+		"nbf":            time.Now().Add(-5 * time.Second).Unix(),
+		"exp":            time.Now().Add(2 * time.Minute).Unix(),
+		"jti":            "jti-identity",
+		"cloud_agent_id": "bc-test",
+		"agent_runtime":  "managed",
+		"repo_urls":      []string{testRepo},
+		"repo_count":     1,
+	})
+
+	resp := postResolve(t, hs.URL, tok, "demo.derived")
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		b, _ := io.ReadAll(resp.Body)
+		t.Fatalf("status=%d body=%s", resp.StatusCode, b)
+	}
+	var out struct {
+		Env map[string]string `json:"env"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		t.Fatal(err)
+	}
+	if out.Env["DEMO_TOKEN"] != "from-exec" {
+		t.Fatalf("env=%v", out.Env)
+	}
+
+	raw, err := os.ReadFile(dump)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var req struct {
+		Capability string `json:"capability"`
+		Operation  string `json:"operation"`
+		Identity   *struct {
+			Subject string `json:"subject"`
+			IDToken string `json:"idToken"`
+		} `json:"identity"`
+	}
+	if err := json.Unmarshal(raw, &req); err != nil {
+		t.Fatalf("decode dumped request: %v\n%s", err, raw)
+	}
+	if req.Capability != "demo.derived" || req.Operation != "resolve" {
+		t.Fatalf("request=%+v", req)
+	}
+	if req.Identity == nil {
+		t.Fatalf("expected identity on exec stdin: %s", raw)
+	}
+	if req.Identity.Subject != testSubject {
+		t.Fatalf("identity.subject=%q want %q", req.Identity.Subject, testSubject)
+	}
+	if req.Identity.IDToken != tok {
+		t.Fatalf("identity.idToken does not match presented bearer token")
+	}
+}

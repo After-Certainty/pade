@@ -89,7 +89,11 @@ The reference Broker invokes `command` with:
 {
   "capability": "demo.derived",
   "operation": "resolve",
-  "config": { }
+  "config": { },
+  "identity": {
+    "subject": "user:42",
+    "idToken": "<exact bearer JWT the client presented>"
+  }
 }
 ```
 
@@ -98,6 +102,25 @@ The reference Broker invokes `command` with:
 | `capability` | Portable capability id from the resolve request |
 | `operation` | `probe` or `resolve` |
 | `config` | Opaque object from `exec.config` (may be omitted/empty) |
+| `identity` | Optional. Present only after the broker successfully verifies the client bearer token and authorizes the capability. Broker-side trusted exec only. |
+
+When `identity` is present:
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `identity.idToken` | **yes** | Exact OIDC JWT string the client presented (for downstream federation such as STS `subject_token`). Not a newly minted token; claims are not stripped. |
+| `identity.subject` | recommended | Broker-verified JWT `sub`; must equal the token’s `sub` when both are set |
+
+Rules:
+
+1. Attach identity **only after successful verification** — never forward an unverified token.
+2. **Trusted exec only** — server-side `provider: exec` bindings. Do not expose this to Consumer/workspace bindings.
+3. Forward the **exact** presented bearer JWT.
+4. **Omit** `identity` when there is no verified bearer (providers that ignore unknown fields keep working; subject-bound providers may fail closed if they require it).
+5. Do **not** put identity into portable Intent / Consumer `provider: broker` YAML.
+6. Shared organizational Material (Milestone L) remains valid when providers ignore `identity`.
+
+**Exercise in tests:** `TestExecForwardsVerifiedIdentity` / `TestExecOmitsIdentityWithoutContext` in `internal/binding/exec`, and `TestResolveForwardsVerifiedIdentityToExec` in `internal/broker` (fake OIDC → `/v1/resolve` → exec stdin). Fake-OIDC dogfood paths (`make dogfood-exec-provider*`, `make dogfood-broker`) continue to work; whenever broker verify succeeds for an exec binding, stdin includes `identity`.
 
 Clients cannot supply `command`, argv, or executable paths on the broker resolve request.
 
