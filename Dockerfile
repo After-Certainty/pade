@@ -21,7 +21,7 @@ RUN CGO_ENABLED=0 go build -ldflags "-s -w \
 FROM gcr.io/distroless/static-debian12:nonroot
 ARG VERSION=dev
 ARG VCS_REF=unknown
-ARG IMAGE_SOURCE=https://github.com/ksteffe/pade
+ARG IMAGE_SOURCE=https://github.com/After-Certainty/pade
 LABEL org.opencontainers.image.title="pade-broker" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.revision="${VCS_REF}" \
