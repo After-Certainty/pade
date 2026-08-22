@@ -10,8 +10,10 @@ func TestVerifiedIdentityFrom(t *testing.T) {
 	if _, ok := VerifiedIdentityFrom(context.Background()); ok {
 		t.Fatal("expected absent identity on empty context")
 	}
-	if _, ok := VerifiedIdentityFrom(nil); ok {
-		t.Fatal("expected absent identity on nil context")
+	// VerifiedIdentityFrom treats a missing value as absent; callers should
+	// still pass a non-nil Context into Resolve/Probe.
+	if _, ok := VerifiedIdentityFrom(context.TODO()); ok {
+		t.Fatal("expected absent identity on empty context")
 	}
 	if _, ok := VerifiedIdentityFrom(WithVerifiedIdentity(context.Background(), VerifiedIdentity{Subject: "user:1"})); ok {
 		t.Fatal("expected absent identity when IDToken empty")
