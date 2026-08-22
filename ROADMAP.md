@@ -454,7 +454,7 @@ Previous letters after PR #31 (GA-first A–M) and the post-`v0.1.0` Cloudflare/
 
 | Milestone | Focus | Where work happens |
 |-----------|--------|--------------------|
-| **J — Released broker deployment** | Private deploy consumes `ghcr.io/ksteffe/pade-broker:vX.Y.Z` | `pade-broker-deployment` — **DONE** (released `v0.1.0` GHCR image) |
+| **J — Released broker deployment** | Private deploy consumes `ghcr.io/after-certainty/pade-broker:vX.Y.Z` (`v0.1.0` under `ghcr.io/ksteffe/…`) | `pade-broker-deployment` — **DONE** (released `v0.1.0` GHCR image) |
 | **K — Released Consumer dogfood** | Cursor Cloud uses released `pade` against real deployed broker | External + PADE artifacts — **DONE** (released `pade v0.1.0`; consumer-repo GA connectivity) |
 | **L — External CLI authority dogfood** | Real vendor CLI (Vercel as concrete dogfood) via generic Material; no Vercel in PADE | Broker deployment + consumer repository — **DONE** (Vercel logs from a Cloud Agent) |
 | **M — Subject-bound authority (WIF experiment)** | Same portable capability → different Material by subject via downstream IAM | Broker deployment + external identity/IAM |
@@ -764,8 +764,10 @@ GitHub Release (+ tag)
 **`pade-broker-deployment` consumes:**
 
 ```text
-ghcr.io/ksteffe/pade-broker:vX.Y.Z
+ghcr.io/after-certainty/pade-broker:vX.Y.Z
 ```
+
+(`v0.1.0` was published under `ghcr.io/ksteffe/pade-broker` before the org transfer.)
 
 without cloning or building PADE source. Operators must be able to identify PADE version, source commit, and image digest.
 
