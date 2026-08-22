@@ -36,7 +36,7 @@ Development builds without `VERSION=…` report `dev` plus the current git short
 - **CLI:** install from GitHub Release assets (or build from a tag).
 - **Broker:** `ghcr.io/after-certainty/pade-broker:vX.Y.Z` (current owner; `v0.1.0` remains at `ghcr.io/ksteffe/pade-broker:v0.1.0`) — no need to clone this repository on the broker host.
 
-See [ROADMAP.md](../ROADMAP.md) Milestone I (DONE) and post-release Milestones J–N (DONE) / O.
+See [ROADMAP.md](../ROADMAP.md) Milestone I (DONE) and post-release Milestones J–O (DONE).
 
 ### Milestone M release note (`v0.1.1`)
 
