@@ -656,7 +656,6 @@ capabilities:
 	}
 }
 
-
 func TestResolveForwardsVerifiedIdentityToExec(t *testing.T) {
 	dir := t.TempDir()
 	dump := filepath.Join(dir, "request.json")
