@@ -102,7 +102,7 @@ Derived from the repository as of this roadmap pass (reference Consumer/Broker c
 | Live Cloud Run broker E2E (derived tokens) | DONE | Cloud Agent → private Cloud Run `pade-broker` (`pade-broker-deployment`); real Cursor OIDC; live GitHub `/repos/{owner}/{repo}` + GA Admin/Data API |
 | Version reporting (`pade` / `pade-broker --version`) | DONE | `internal/version`; `-ldflags` at build/release time |
 | GitHub Release artifacts | DONE | Manual `workflow_dispatch` [`.github/workflows/release.yml`](../.github/workflows/release.yml); first cut [`v0.1.0`](https://github.com/ksteffe/pade/releases/tag/v0.1.0) |
-| Broker container publishing (GHCR) | DONE | `ghcr.io/ksteffe/pade-broker:v0.1.0` (+ digest on the GitHub Release); OCI labels in [`Dockerfile`](../Dockerfile) |
+| Broker container publishing (GHCR) | DONE | `ghcr.io/ksteffe/pade-broker:v0.1.0` (pre-transfer); from `v0.1.1` → `ghcr.io/after-certainty/pade-broker` (+ digest on the GitHub Release); OCI labels in [`Dockerfile`](../Dockerfile) |
 | Released broker deployment (external) | DONE | `pade-broker-deployment` consumes released GHCR image (Milestone J) |
 | Released Consumer dogfood (external) | DONE | Released `pade v0.1.0` against released broker from PADE Cloud Agent E2E and a cloud-agent consumer repository GA connectivity (Milestone K) |
 | External vendor CLI dogfood (Vercel) | DONE | Cloud Agent consumer repo retrieved Vercel logs via generic Material from `pade-broker-deployment` (Milestone L). No Vercel in PADE core. |
@@ -454,7 +454,7 @@ Previous letters after PR #31 (GA-first A–M) and the post-`v0.1.0` Cloudflare/
 
 | Milestone | Focus | Where work happens |
 |-----------|--------|--------------------|
-| **J — Released broker deployment** | Private deploy consumes `ghcr.io/ksteffe/pade-broker:vX.Y.Z` | `pade-broker-deployment` — **DONE** (released `v0.1.0` GHCR image) |
+| **J — Released broker deployment** | Private deploy consumes `ghcr.io/after-certainty/pade-broker:vX.Y.Z` (`v0.1.0` under `ghcr.io/ksteffe/…`) | `pade-broker-deployment` — **DONE** (released `v0.1.0` GHCR image) |
 | **K — Released Consumer dogfood** | Cursor Cloud uses released `pade` against real deployed broker | External + PADE artifacts — **DONE** (released `pade v0.1.0`; consumer-repo GA connectivity) |
 | **L — External CLI authority dogfood** | Real vendor CLI (Vercel as concrete dogfood) via generic Material; no Vercel in PADE | Broker deployment + consumer repository — **DONE** (Vercel logs from a Cloud Agent) |
 | **M — Subject-bound authority (WIF experiment)** | Same portable capability → different Material by subject via downstream IAM | Broker deployment + external identity/IAM |
@@ -730,7 +730,7 @@ Do **not** redesign DevelopmentSession / Intent around Runtime Conditions or inv
 - GitHub Releases with release notes (generated from commits/PRs at release time; formal `CHANGELOG.md` optional later)
 - Checksums (e.g. SHA-256) for all CLI artifacts
 - CLI binaries: **Linux amd64**, **Linux arm64**, **macOS arm64** (`pade`; include `pade-broker` binary if useful for local spikes). Skip **macOS amd64** unless a consumer asks.
-- Versioned broker container on GHCR: `ghcr.io/ksteffe/pade-broker:vX.Y.Z`
+- Versioned broker container on GHCR: `ghcr.io/after-certainty/pade-broker:vX.Y.Z` (`v0.1.0` remains under `ghcr.io/ksteffe/pade-broker`)
 - Immutable image digest published alongside the tag; prefer digest pins in production deploy
 - OCI labels: `org.opencontainers.image.version`, `org.opencontainers.image.revision` (git commit), `org.opencontainers.image.source`
 
@@ -764,8 +764,10 @@ GitHub Release (+ tag)
 **`pade-broker-deployment` consumes:**
 
 ```text
-ghcr.io/ksteffe/pade-broker:vX.Y.Z
+ghcr.io/after-certainty/pade-broker:vX.Y.Z
 ```
+
+(`v0.1.0` was published under `ghcr.io/ksteffe/pade-broker` before the org transfer.)
 
 without cloning or building PADE source. Operators must be able to identify PADE version, source commit, and image digest.
 

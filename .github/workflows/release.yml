@@ -103,6 +103,14 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # GHCR namespaces are lowercase; do not hardcode a personal owner after a
+      # transfer (e.g. ksteffe → After-Certainty).
+      - name: Resolve GHCR image name
+        id: image
+        run: |
+          owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          echo "broker=ghcr.io/${owner}/pade-broker" >> "$GITHUB_OUTPUT"
+
       - name: Build and push pade-broker image
         id: broker-image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v5.7.0
@@ -110,8 +118,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/ksteffe/pade-broker:${{ steps.meta.outputs.version }}
-            ghcr.io/ksteffe/pade-broker:latest
+            ${{ steps.image.outputs.broker }}:${{ steps.meta.outputs.version }}
+            ${{ steps.image.outputs.broker }}:latest
           build-args: |
             VERSION=${{ steps.meta.outputs.version }}
             VCS_REF=${{ steps.meta.outputs.commit }}

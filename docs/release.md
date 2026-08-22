@@ -11,10 +11,12 @@ Pre-1.0 SemVer. Initial release: **[`v0.1.0`](https://github.com/ksteffe/pade/re
    - re-run unit, smoke, and container smoke checks;
    - build CLI archives for **linux/amd64**, **linux/arm64**, **darwin/arm64** (`pade` + `pade-broker` per archive);
    - write `SHA256SUMS` and a broker image digest manifest;
-   - push `ghcr.io/ksteffe/pade-broker:<version>` (and `:latest`);
+   - push `ghcr.io/<owner-lowercase>/pade-broker:<version>` (and `:latest`), e.g. `ghcr.io/after-certainty/pade-broker` after the org transfer;
    - create a GitHub Release with generated release notes.
 
 Prefer **digest pins** for production broker deploys. The release uploads `pade-broker-image.digest` alongside CLI tarballs.
+
+> **Owner transfer note:** `v0.1.0` was published under `ghcr.io/ksteffe/pade-broker`. From `v0.1.1` onward images publish under the current repository owner’s GHCR namespace (lowercase). The Release workflow must not hardcode a former personal owner.
 
 ## Local builds
 
@@ -32,7 +34,7 @@ Development builds without `VERSION=…` report `dev` plus the current git short
 ## Consumer contract
 
 - **CLI:** install from GitHub Release assets (or build from a tag).
-- **Broker:** `ghcr.io/ksteffe/pade-broker:vX.Y.Z` — no need to clone this repository on the broker host.
+- **Broker:** `ghcr.io/after-certainty/pade-broker:vX.Y.Z` (current owner; `v0.1.0` remains at `ghcr.io/ksteffe/pade-broker:v0.1.0`) — no need to clone this repository on the broker host.
 
 See [ROADMAP.md](../ROADMAP.md) Milestone I (DONE) and post-release Milestones J–L (DONE) / M–O.
 
