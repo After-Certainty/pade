@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	keeper "github.com/ksteffe/pade/internal/binding/keeper"
+	"github.com/After-Certainty/pade/internal/binding"
+	keeper "github.com/After-Certainty/pade/internal/binding/keeper"
 )
 
 func TestKeeperProbeAndResolve(t *testing.T) {

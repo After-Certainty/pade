@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ksteffe/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/binding"
 )
 
 const (

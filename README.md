@@ -69,6 +69,15 @@ This repository contains the Go **reference** Consumer ([`pade`](cmd/pade)) and 
 
 Provider adapters (env, Vault, 1Password, Keeper, Keeper Secrets Manager) and the Cursor OIDC workload identity adapter are **reference implementation** integrations—not automatic parts of the PADE standard.
 
+### Go module path
+
+| Release | Module path |
+|---------|-------------|
+| `v0.1.0`, `v0.1.1` | `github.com/ksteffe/pade` |
+| **`v0.2.0` onward** | **`github.com/After-Certainty/pade`** |
+
+GitHub repository: [`After-Certainty/pade`](https://github.com/After-Certainty/pade). See [docs/release.md](docs/release.md) for migration and the old-path redirect stub.
+
 ## Quick start
 
 Requires **Go 1.22+**. macOS Homebrew `go` 1.13 will fail with errors like `cannot load embed` — that toolchain predates the `embed` standard library.

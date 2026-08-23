@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ksteffe/pade/spec"
+	"github.com/After-Certainty/pade/spec"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
 )

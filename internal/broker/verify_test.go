@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/After-Certainty/pade/internal/broker"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/ksteffe/pade/internal/broker"
 )
 
 func TestVerifyRequiresExpiration(t *testing.T) {

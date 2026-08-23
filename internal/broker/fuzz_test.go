@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/broker"
+	"github.com/After-Certainty/pade/internal/broker"
 )
 
 func FuzzParsePolicy(f *testing.F) {

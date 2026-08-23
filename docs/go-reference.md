@@ -639,7 +639,7 @@ The Go CLI should eventually support common installation paths:
 - Homebrew (**deferred**);
 - package managers where demand exists (**deferred**);
 - container image for CI / broker deployment (**near-term:** versioned GHCR `pade-broker`);
-- go install for developers (still fine for contributors; external consumers should prefer release tags).
+- **Go module path:** `github.com/After-Certainty/pade` from **`v0.2.0`** onward (`github.com/ksteffe/pade` for `v0.1.x` only). `go install github.com/After-Certainty/pade/cmd/pade@v0.2.0` for developers; external consumers should prefer release tags. See [release.md](release.md).
 
 Near-term release automation targets Linux amd64/arm64 and macOS arm64. macOS amd64, Windows, Homebrew, and supply-chain signing/provenance beyond checksums remain deferred unless a consumer requires them—see [ROADMAP.md](../ROADMAP.md).
 

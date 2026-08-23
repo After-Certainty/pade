@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/identity"
-	cursorid "github.com/ksteffe/pade/internal/identity/cursor"
-	"github.com/ksteffe/pade/internal/securehttp"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/identity"
+	cursorid "github.com/After-Certainty/pade/internal/identity/cursor"
+	"github.com/After-Certainty/pade/internal/securehttp"
 )
 
 // Provider resolves capabilities through a remote PADE broker using Cursor OIDC.

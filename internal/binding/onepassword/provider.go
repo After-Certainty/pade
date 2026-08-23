@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/binding/cliproc"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/binding/cliproc"
 )
 
 // Provider resolves capabilities via the 1Password CLI (`op read`).

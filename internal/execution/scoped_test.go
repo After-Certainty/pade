@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/binding"
-	envprovider "github.com/ksteffe/pade/internal/binding/env"
-	keepersmprovider "github.com/ksteffe/pade/internal/binding/keepersm"
-	"github.com/ksteffe/pade/internal/execution"
+	"github.com/After-Certainty/pade/internal/binding"
+	envprovider "github.com/After-Certainty/pade/internal/binding/env"
+	keepersmprovider "github.com/After-Certainty/pade/internal/binding/keepersm"
+	"github.com/After-Certainty/pade/internal/execution"
 )
 
 func TestScopedRunInjectsOnlyChildEnv(t *testing.T) {

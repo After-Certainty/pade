@@ -1,4 +1,4 @@
-module github.com/ksteffe/pade
+module github.com/After-Certainty/pade
 
 go 1.22
 

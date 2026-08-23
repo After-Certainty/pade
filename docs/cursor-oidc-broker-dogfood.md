@@ -146,7 +146,7 @@ policies:
   - subject: "user:<your-cursor-user-id>"
     requireRepoURLs: true
     repositories:
-      - github.com/ksteffe/pade
+      - github.com/After-Certainty/pade
     capabilities:
       - github.user.read
 ```

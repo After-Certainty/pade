@@ -4,7 +4,7 @@
 #
 # Requires:
 #   GITHUB_TOKEN   — process-scoped Material from pade exec
-#   GITHUB_REPOSITORY — owner/name (e.g. ksteffe/pade)
+#   GITHUB_REPOSITORY — owner/name (e.g. After-Certainty/pade)
 #
 # Never prints GITHUB_TOKEN. Tokens with prefix "ghs_pade_fake_" or "pade-demo-"
 # skip the network call so CI stays offline-friendly.

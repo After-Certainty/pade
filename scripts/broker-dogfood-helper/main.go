@@ -22,10 +22,10 @@ import (
 	"sort"
 	"time"
 
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/broker"
+	"github.com/After-Certainty/pade/internal/providerset"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/broker"
-	"github.com/ksteffe/pade/internal/providerset"
 )
 
 func main() {
@@ -86,7 +86,7 @@ policies:
   - subject: "user:dogfood"
     requireRepoURLs: true
     repositories:
-      - github.com/ksteffe/pade
+      - github.com/After-Certainty/pade
     capabilities:
 `, issuer, audience, jwksURL+"/keys")
 	for _, c := range caps {
@@ -117,7 +117,7 @@ policies:
 		"iat": time.Now().Unix(), "nbf": time.Now().Add(-5 * time.Second).Unix(),
 		"exp": time.Now().Add(5 * time.Minute).Unix(), "jti": "dogfood",
 		"cloud_agent_id": "bc-dogfood", "agent_runtime": "managed",
-		"repo_urls": []string{"github.com/ksteffe/pade"}, "repo_count": 1,
+		"repo_urls": []string{"github.com/After-Certainty/pade"}, "repo_count": 1,
 	})
 	tok.Header["kid"] = "dogfood"
 	signed, err := tok.SignedString(key)

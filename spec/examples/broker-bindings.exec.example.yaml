@@ -14,7 +14,7 @@ capabilities:
       config:
         tokenEnv: GITHUB_TOKEN
         privateKeyPath: /run/secrets/github-app/private-key.pem
-        repositories: [ksteffe/pade]
+        repositories: [After-Certainty/pade]
         permissions:
           metadata: read
           contents: read

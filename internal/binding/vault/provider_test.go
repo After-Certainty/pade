@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/binding"
-	vaultprovider "github.com/ksteffe/pade/internal/binding/vault"
+	"github.com/After-Certainty/pade/internal/binding"
+	vaultprovider "github.com/After-Certainty/pade/internal/binding/vault"
 )
 
 func TestVaultProbeAndResolve(t *testing.T) {

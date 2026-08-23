@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/After-Certainty/pade/internal/securehttp"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/ksteffe/pade/internal/securehttp"
 )
 
 const (

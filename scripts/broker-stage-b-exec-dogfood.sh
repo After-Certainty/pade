@@ -18,7 +18,7 @@ AUDIENCE="${PADE_BROKER_AUDIENCE:-https://pade-broker.local}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/pade-broker-stage-b-exec.XXXXXX")"
 BROKER_LOG="$WORK/broker.log"
 MANIFEST="$WORK/pade.yaml"
-REPO="${PADE_DOGFOOD_REPO:-ksteffe/pade}"
+REPO="${PADE_DOGFOOD_REPO:-After-Certainty/pade}"
 GA_PROPERTY="${GA_PROPERTY_ID:-properties/000000000}"
 
 cleanup() {

@@ -55,7 +55,7 @@ func TestDeriveInstallationToken(t *testing.T) {
 		InstallationID: "99",
 		PrivateKeyPEM:  string(pemBytes),
 		APIURL:         srv.URL,
-		Repositories:   []string{"ksteffe/pade"},
+		Repositories:   []string{"After-Certainty/pade"},
 		Permissions:    map[string]string{"contents": "read", "metadata": "read"},
 	})
 	if err != nil {
@@ -122,7 +122,7 @@ func TestValidateRequiresFields(t *testing.T) {
 }
 
 func TestRepositoryNamesForAPI(t *testing.T) {
-	got := repositoryNamesForAPI([]string{"ksteffe/pade", "hello-world", " org/other "})
+	got := repositoryNamesForAPI([]string{"After-Certainty/pade", "hello-world", " org/other "})
 	if len(got) != 3 || got[0] != "pade" || got[1] != "hello-world" || got[2] != "other" {
 		t.Fatalf("got=%v", got)
 	}

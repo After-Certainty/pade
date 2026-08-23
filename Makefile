@@ -5,9 +5,9 @@ VERSION ?= dev
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_TIME ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)
 LDFLAGS := -s -w \
-	-X github.com/ksteffe/pade/internal/version.Version=$(VERSION) \
-	-X github.com/ksteffe/pade/internal/version.Commit=$(COMMIT) \
-	-X github.com/ksteffe/pade/internal/version.BuildTime=$(BUILD_TIME)
+	-X github.com/After-Certainty/pade/internal/version.Version=$(VERSION) \
+	-X github.com/After-Certainty/pade/internal/version.Commit=$(COMMIT) \
+	-X github.com/After-Certainty/pade/internal/version.BuildTime=$(BUILD_TIME)
 RELEASE_BUILD := $(CURDIR)/scripts/release-build.sh
 DEVPOD_DOGFOOD := $(CURDIR)/scripts/devpod-dogfood.sh
 

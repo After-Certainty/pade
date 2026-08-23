@@ -3,7 +3,7 @@ package manifest_test
 import (
 	"testing"
 
-	"github.com/ksteffe/pade/internal/manifest"
+	"github.com/After-Certainty/pade/internal/manifest"
 )
 
 func FuzzParseIntent(f *testing.F) {

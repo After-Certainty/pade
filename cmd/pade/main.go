@@ -7,13 +7,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/execution"
-	"github.com/ksteffe/pade/internal/manifest"
-	"github.com/ksteffe/pade/internal/output"
-	"github.com/ksteffe/pade/internal/planner"
-	"github.com/ksteffe/pade/internal/providerset"
-	"github.com/ksteffe/pade/internal/version"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/execution"
+	"github.com/After-Certainty/pade/internal/manifest"
+	"github.com/After-Certainty/pade/internal/output"
+	"github.com/After-Certainty/pade/internal/planner"
+	"github.com/After-Certainty/pade/internal/providerset"
+	"github.com/After-Certainty/pade/internal/version"
 	"github.com/spf13/cobra"
 )
 

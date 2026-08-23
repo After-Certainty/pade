@@ -10,9 +10,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -ldflags "-s -w \
-  -X github.com/ksteffe/pade/internal/version.Version=${VERSION} \
-  -X github.com/ksteffe/pade/internal/version.Commit=${VCS_REF} \
-  -X github.com/ksteffe/pade/internal/version.BuildTime=${BUILD_TIME}" \
+  -X github.com/After-Certainty/pade/internal/version.Version=${VERSION} \
+  -X github.com/After-Certainty/pade/internal/version.Commit=${VCS_REF} \
+  -X github.com/After-Certainty/pade/internal/version.BuildTime=${BUILD_TIME}" \
   -o /out/pade-broker ./cmd/pade-broker
 
 # static-debian12 includes CA certificates for outbound HTTPS (JWKS, Keeper).
