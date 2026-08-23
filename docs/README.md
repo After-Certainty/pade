@@ -15,6 +15,8 @@ Navigation roots: [../README.md](../README.md) (current direction), [../ROADMAP.
 | [../DESIGN.md](../DESIGN.md) | Reference implementation design history |
 | [go-reference.md](go-reference.md) | Go reference Consumer/Broker design history (not Intent API version) |
 | [manifest-conventions.md](manifest-conventions.md) | DevelopmentSession apiVersion/kind/metadata/spec conventions |
+| [testing.md](testing.md) | Testing / dogfood taxonomy — CI mapping and subsystem → command matrix |
+| [broker-auth-security.md](broker-auth-security.md) | Broker OIDC/JWT/JWKS security posture (reference implementation) |
 | [devpod-dogfood.md](devpod-dogfood.md) | DevPod composition / Milestone 4 dogfood |
 | [identity-separation.md](identity-separation.md) | Identity separation / Milestone 5 dogfood |
 | [vault-dogfood.md](vault-dogfood.md) | Vault `-dev` capability resolution dogfood |

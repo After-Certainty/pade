@@ -140,7 +140,7 @@ make dogfood-ingress-teleport-down
 make dogfood-devpod  # optional: full DevPod proof (needs docker + devpod)
 ```
 
-CI runs on pushes to `main` and on pull requests via [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+CI runs on pushes to `main` and on pull requests via [`.github/workflows/ci.yml`](.github/workflows/ci.yml). For a maintainer index of **which tests to run after changing a subsystem**, see [docs/testing.md](docs/testing.md).
 
 - **Unit tests** — `make ci-unit`: `gofmt` (all tracked `.go` files), `go mod verify`, `go vet`, shuffled `go test`, staticcheck, race detector, govulncheck, build
 - **Go 1.22 compatibility** — `make ci-compat` on Go 1.22 (`GOTOOLCHAIN=local`): `go test ./...` and `go build ./...` only
@@ -211,7 +211,7 @@ Earlier sections of [DESIGN.md](DESIGN.md) and [docs/go-reference.md](docs/go-re
 | [AGENTS.md](AGENTS.md) | Guidance for coding agents working in this repo |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
 | [LICENSE](LICENSE) | Apache License 2.0 |
-| [docs/devpod-dogfood.md](docs/devpod-dogfood.md) | DevPod composition / Milestone 4 |
+| [docs/testing.md](docs/testing.md) | Testing / dogfood taxonomy — what to run after changing a subsystem |
 | [docs/identity-separation.md](docs/identity-separation.md) | Milestone 5 identity-separation dogfood |
 | [docs/vault-dogfood.md](docs/vault-dogfood.md) | Vault `-dev` capability resolution dogfood |
 | [docs/onepassword-dogfood.md](docs/onepassword-dogfood.md) | 1Password provider + live dogfood |

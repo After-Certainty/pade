@@ -63,6 +63,8 @@ fmt-check: check-go
 vet: check-go
 	$(GO) vet ./...
 
+# --- CI regression (mirrors GitHub Actions unit + smoke jobs) ---
+
 test: check-go
 	$(GO) test ./...
 
@@ -93,6 +95,8 @@ build-linux:
 	@chmod +x "$(DEVPOD_DOGFOOD)"
 	@$(DEVPOD_DOGFOOD) build
 
+# --- Local examples (quick CLI checks) ---
+
 validate: check-go
 	$(GO) run ./cmd/pade validate -f spec/examples/web-app.yaml
 
@@ -111,6 +115,8 @@ exec-demo: check-go build
 	  --bindings spec/examples/bindings.example.yaml \
 	  --capability google-analytics.read \
 	  -- /bin/sh -c 'test -n "$$GA_PROPERTY_ID" && test -n "$$GOOGLE_APPLICATION_CREDENTIALS" && echo exec-ok'
+
+# --- Local deterministic dogfood (CI smoke subset; fakes/shims, no external credentials) ---
 
 # Milestone 4: PADE smoke against examples/demo-project (DevPod not required).
 dogfood: check-go build
@@ -175,6 +181,8 @@ dogfood-exec-provider-two: check-go build
 		examples/demo-project/scripts/github-repo-meta \
 		examples/demo-project/scripts/ga-property-meta
 	@PADE="$(CURDIR)/bin/pade" GO="$(GO)" "$(EXEC_PROVIDER_DOGFOOD)" two
+
+# --- Live / manual integration (not CI; requires credentials or Cloud Agent) ---
 
 # Stage B (Cursor Cloud Agent only, not CI): real Cursor OIDC + local pade-broker + fake KSM.
 # Requires identity socket. Optional: PADE_STAGE_B_SUBJECT=user:<id> to pin allowlist.
@@ -241,6 +249,7 @@ dogfood-ingress-teleport-down:
 	@"$(TELEPORT_INGRESS_DOGFOOD)" down
 
 # --- DevPod dogfood (requires docker + devpod; separate DevPod GHA workflow) ---
+
 dogfood-devpod-check:
 	@chmod +x "$(DEVPOD_DOGFOOD)"
 	@$(DEVPOD_DOGFOOD) check

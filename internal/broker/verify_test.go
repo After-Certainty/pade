@@ -604,3 +604,214 @@ func TestJWKSConcurrentBogusKidRefresh(t *testing.T) {
 		t.Fatalf("fetches=%d want 2 (prime + one forced refresh for concurrent bogus kids)", got)
 	}
 }
+
+func TestVerifyRejectsMalformedJWT(t *testing.T) {
+	t.Parallel()
+	key := mustKey(t)
+	jwks := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(jwksFor(key, "test-kid"))
+	}))
+	t.Cleanup(jwks.Close)
+
+	v := &broker.Verifier{
+		Issuer: testIssuer, Audience: testAudience, JWKSURL: jwks.URL,
+		HTTPDo: jwks.Client().Do,
+	}
+	ctx := context.Background()
+
+	for _, tok := range []string{
+		"not-a-jwt",
+		"a.b",
+		"a.b.c.d",
+		"!!!.!!!.!!!",
+		noneAlgToken(t, jwt.MapClaims{
+			"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+			"exp": time.Now().Add(time.Minute).Unix(),
+		}),
+	} {
+		if _, err := v.Verify(ctx, tok); err == nil {
+			t.Fatalf("token %q: expected rejection", tok)
+		}
+	}
+}
+
+func TestJWKSHTTPErrorResponses(t *testing.T) {
+	t.Parallel()
+	for _, code := range []int{http.StatusBadRequest, http.StatusUnauthorized, http.StatusInternalServerError, http.StatusBadGateway} {
+		code := code
+		t.Run(http.StatusText(code), func(t *testing.T) {
+			t.Parallel()
+			v := &broker.Verifier{
+				Issuer: testIssuer, Audience: testAudience, JWKSURL: "http://127.0.0.1/keys",
+				HTTPDo: func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: code,
+						Body:       io.NopCloser(strings.NewReader(`{"keys":[]}`)),
+						Header:     make(http.Header),
+					}, nil
+				},
+			}
+			_, err := v.Verify(context.Background(), "header.payload.sig")
+			if err == nil || !strings.Contains(err.Error(), "jwks fetch http") {
+				t.Fatalf("status %d: err=%v", code, err)
+			}
+		})
+	}
+}
+
+func TestJWKSUnreadableBody(t *testing.T) {
+	t.Parallel()
+	v := &broker.Verifier{
+		Issuer: testIssuer, Audience: testAudience, JWKSURL: "http://127.0.0.1/keys",
+		HTTPDo: func(*http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(brokenReader{}),
+				Header:     make(http.Header),
+			}, nil
+		},
+	}
+	_, err := v.Verify(context.Background(), "x.y.z")
+	if err == nil || !strings.Contains(err.Error(), "jwks read failed") {
+		t.Fatalf("err=%v", err)
+	}
+}
+
+func TestVerifySkewAndLifetimeBoundaries(t *testing.T) {
+	key := mustKey(t)
+	jwks := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(jwksFor(key, "test-kid"))
+	}))
+	t.Cleanup(jwks.Close)
+
+	now := time.Date(2026, 8, 23, 12, 0, 0, 0, time.UTC)
+	v := &broker.Verifier{
+		Issuer: testIssuer, Audience: testAudience, JWKSURL: jwks.URL,
+		HTTPDo: jwks.Client().Do,
+		Now:    func() time.Time { return now },
+	}
+	ctx := context.Background()
+
+	// exp == now + skew (30s) should still validate
+	atSkew := mustSign(t, key, "test-kid", jwt.MapClaims{
+		"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+		"iat": now.Unix(), "exp": now.Add(30 * time.Second).Unix(),
+	})
+	if _, err := v.Verify(ctx, atSkew); err != nil {
+		t.Fatalf("at skew boundary: %v", err)
+	}
+
+	// exp == now + 24h + skew should validate (inclusive upper bound)
+	atMax := mustSign(t, key, "test-kid", jwt.MapClaims{
+		"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+		"iat": now.Unix(), "exp": now.Add(24*time.Hour + 30*time.Second).Unix(),
+	})
+	if _, err := v.Verify(ctx, atMax); err != nil {
+		t.Fatalf("at max lifetime boundary: %v", err)
+	}
+
+	// exp == now + 24h + skew + 1s must fail
+	overMax := mustSign(t, key, "test-kid", jwt.MapClaims{
+		"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+		"iat": now.Unix(), "exp": now.Add(24*time.Hour + 31*time.Second).Unix(),
+	})
+	if _, err := v.Verify(ctx, overMax); err == nil {
+		t.Fatal("expected over-max lifetime rejection")
+	}
+}
+
+func TestJWKSRefreshFailureWhenCacheExpired(t *testing.T) {
+	key := mustKey(t)
+	var fetches int32
+	jwks := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		n := atomic.AddInt32(&fetches, 1)
+		if n == 1 {
+			_ = json.NewEncoder(w).Encode(jwksFor(key, "test-kid"))
+			return
+		}
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	t.Cleanup(jwks.Close)
+
+	now := time.Date(2026, 8, 23, 12, 0, 0, 0, time.UTC)
+	v := &broker.Verifier{
+		Issuer: testIssuer, Audience: testAudience, JWKSURL: jwks.URL,
+		HTTPDo: jwks.Client().Do,
+		Now:    func() time.Time { return now },
+	}
+	ctx := context.Background()
+	tok := mustSign(t, key, "test-kid", jwt.MapClaims{
+		"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+		"iat": now.Unix(), "exp": now.Add(2 * time.Minute).Unix(),
+	})
+	if _, err := v.Verify(ctx, tok); err != nil {
+		t.Fatalf("prime verify: %v", err)
+	}
+
+	now = now.Add(6 * time.Minute)
+	if _, err := v.Verify(ctx, tok); err == nil {
+		t.Fatal("expected verify to fail when cache expired and JWKS refresh fails")
+	}
+	if atomic.LoadInt32(&fetches) != 2 {
+		t.Fatalf("fetches=%d want 2", fetches)
+	}
+}
+
+func TestJWKSUnknownKidRefreshFailurePreservesCache(t *testing.T) {
+	key := mustKey(t)
+	var fetches int32
+	jwks := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		n := atomic.AddInt32(&fetches, 1)
+		if n == 1 {
+			_ = json.NewEncoder(w).Encode(jwksFor(key, "test-kid"))
+			return
+		}
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	t.Cleanup(jwks.Close)
+
+	now := time.Date(2026, 8, 23, 12, 0, 0, 0, time.UTC)
+	v := &broker.Verifier{
+		Issuer: testIssuer, Audience: testAudience, JWKSURL: jwks.URL,
+		HTTPDo: jwks.Client().Do,
+		Now:    func() time.Time { return now },
+	}
+	ctx := context.Background()
+	good := mustSign(t, key, "test-kid", jwt.MapClaims{
+		"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+		"iat": now.Unix(), "exp": now.Add(2 * time.Minute).Unix(),
+	})
+	if _, err := v.Verify(ctx, good); err != nil {
+		t.Fatalf("prime verify: %v", err)
+	}
+
+	bogus := mustSign(t, key, "bogus-kid", jwt.MapClaims{
+		"iss": testIssuer, "sub": testSubject, "aud": testAudience,
+		"iat": now.Unix(), "exp": now.Add(2 * time.Minute).Unix(),
+	})
+	if _, err := v.Verify(ctx, bogus); err == nil {
+		t.Fatal("expected bogus kid to fail")
+	}
+
+	if _, err := v.Verify(ctx, good); err != nil {
+		t.Fatalf("cached key should still verify after failed unknown-kid refresh: %v", err)
+	}
+	if atomic.LoadInt32(&fetches) != 2 {
+		t.Fatalf("fetches=%d want 2 (prime + one failed forced refresh)", fetches)
+	}
+}
+
+func noneAlgToken(t *testing.T, claims jwt.MapClaims) string {
+	t.Helper()
+	header := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"none","typ":"JWT"}`))
+	payload, err := json.Marshal(claims)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := base64.RawURLEncoding.EncodeToString(payload)
+	return header + "." + body + "."
+}
+
+type brokenReader struct{}
+
+func (brokenReader) Read([]byte) (int, error) { return 0, io.ErrUnexpectedEOF }

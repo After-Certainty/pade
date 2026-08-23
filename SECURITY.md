@@ -206,6 +206,7 @@ Important distinctions:
 - For single-repo confinement, require complete `repo_urls` attestation. Missing `repo_urls` means unknown, not single-repo. Do not authorize from `repo_url` alone. Managed Cloud Agents have been observed with `repo_url` but without `repo_urls`; until complete attestation exists, broker dogfood uses subject + capability (`requireRepoURLs: false`) rather than weakening policy to trust `repo_url`. Policy YAML must set `requireRepoURLs` explicitly; typos/omission fail closed.
 - Broker logs must contain identity/capability decision metadata only — never JWTs or resolved credentials. Repo URLs in authz logs are sanitized to canonical host/path form (no userinfo/query/fragment).
 - JWT expiration is mandatory. JTI replay tracking remains deferred; this spike relies on short-lived tokens, a 24h maximum remaining lifetime ceiling, and exact audience binding.
+- Reference JWT/JWKS verification posture: [docs/broker-auth-security.md](docs/broker-auth-security.md).
 - The PADE contract still does not replace resource-level authorization (GitHub, IAM, databases, etc.).
 
 ### Broker transport modes
