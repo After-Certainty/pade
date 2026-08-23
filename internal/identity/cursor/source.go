@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ksteffe/pade/internal/identity"
+	"github.com/After-Certainty/pade/internal/identity"
 )
 
 const (

@@ -3,7 +3,7 @@ package binding_test
 import (
 	"testing"
 
-	"github.com/ksteffe/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/binding"
 )
 
 func FuzzParseBindings(f *testing.F) {

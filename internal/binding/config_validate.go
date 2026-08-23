@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ksteffe/pade/internal/securehttp"
+	"github.com/After-Certainty/pade/internal/securehttp"
 )
 
 // Validate performs lightweight structural checks (no secret inspection).

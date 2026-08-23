@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ksteffe/pade/internal/identity/cursor"
+	"github.com/After-Certainty/pade/internal/identity/cursor"
 )
 
 func TestSourceMintsAndCaches(t *testing.T) {
@@ -153,7 +153,7 @@ func TestDecodeSafeClaims(t *testing.T) {
 		"sub":            "user:42",
 		"cloud_agent_id": "bc-abc",
 		"agent_runtime":  "managed",
-		"repo_urls":      []string{"github.com/ksteffe/pade"},
+		"repo_urls":      []string{"github.com/After-Certainty/pade"},
 		"repo_count":     1,
 		"aud":            "https://broker.example",
 		"exp":            time.Now().Add(time.Minute).Unix(),

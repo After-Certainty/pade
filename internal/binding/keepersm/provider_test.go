@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/binding/keepersm"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/binding/keepersm"
 )
 
 func TestNormalizeNotation(t *testing.T) {

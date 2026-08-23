@@ -21,9 +21,9 @@ case "$VERSION" in
 esac
 
 LDFLAGS="-s -w \
-  -X github.com/ksteffe/pade/internal/version.Version=${VERSION} \
-  -X github.com/ksteffe/pade/internal/version.Commit=${COMMIT} \
-  -X github.com/ksteffe/pade/internal/version.BuildTime=${BUILD_TIME}"
+  -X github.com/After-Certainty/pade/internal/version.Version=${VERSION} \
+  -X github.com/After-Certainty/pade/internal/version.Commit=${COMMIT} \
+  -X github.com/After-Certainty/pade/internal/version.BuildTime=${BUILD_TIME}"
 
 rm -rf "$DIST"
 mkdir -p "$DIST"

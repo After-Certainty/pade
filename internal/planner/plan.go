@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/manifest"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/manifest"
 )
 
 // Plan is a side-effect-free description of what PADE intends to do.

@@ -65,7 +65,7 @@ exec:
     appId: "123456"
     installationId: "789012"
     privateKeyPath: "/run/secrets/github-app.pem"
-    repositories: [ksteffe/pade]
+    repositories: [After-Certainty/pade]
     permissions:
       metadata: read
       contents: read

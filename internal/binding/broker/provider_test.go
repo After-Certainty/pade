@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	brokerprovider "github.com/ksteffe/pade/internal/binding/broker"
-	"github.com/ksteffe/pade/internal/identity"
+	"github.com/After-Certainty/pade/internal/binding"
+	brokerprovider "github.com/After-Certainty/pade/internal/binding/broker"
+	"github.com/After-Certainty/pade/internal/identity"
 )
 
 type staticToken struct {

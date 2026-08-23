@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/execution"
+	"github.com/After-Certainty/pade/internal/execution"
 )
 
 func TestRedactorExactMatch(t *testing.T) {

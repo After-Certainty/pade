@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/binding"
-	envprovider "github.com/ksteffe/pade/internal/binding/env"
+	"github.com/After-Certainty/pade/internal/binding"
+	envprovider "github.com/After-Certainty/pade/internal/binding/env"
 )
 
 // Milestone 5: same capability name, two binding configs / ambient identities,

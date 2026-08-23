@@ -3,14 +3,14 @@
 package providerset
 
 import (
-	"github.com/ksteffe/pade/internal/binding"
-	brokerprovider "github.com/ksteffe/pade/internal/binding/broker"
-	envprovider "github.com/ksteffe/pade/internal/binding/env"
-	execprovider "github.com/ksteffe/pade/internal/binding/exec"
-	keeperprovider "github.com/ksteffe/pade/internal/binding/keeper"
-	keepersmprovider "github.com/ksteffe/pade/internal/binding/keepersm"
-	onepasswordprovider "github.com/ksteffe/pade/internal/binding/onepassword"
-	vaultprovider "github.com/ksteffe/pade/internal/binding/vault"
+	"github.com/After-Certainty/pade/internal/binding"
+	brokerprovider "github.com/After-Certainty/pade/internal/binding/broker"
+	envprovider "github.com/After-Certainty/pade/internal/binding/env"
+	execprovider "github.com/After-Certainty/pade/internal/binding/exec"
+	keeperprovider "github.com/After-Certainty/pade/internal/binding/keeper"
+	keepersmprovider "github.com/After-Certainty/pade/internal/binding/keepersm"
+	onepasswordprovider "github.com/After-Certainty/pade/internal/binding/onepassword"
+	vaultprovider "github.com/After-Certainty/pade/internal/binding/vault"
 )
 
 // Consumer returns providers available to the reference Consumer.

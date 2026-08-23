@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/manifest"
+	"github.com/After-Certainty/pade/internal/manifest"
 )
 
 func validMinimalYAML(name string) string {

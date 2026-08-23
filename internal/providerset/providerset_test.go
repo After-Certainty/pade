@@ -3,7 +3,7 @@ package providerset_test
 import (
 	"testing"
 
-	"github.com/ksteffe/pade/internal/providerset"
+	"github.com/After-Certainty/pade/internal/providerset"
 )
 
 func TestConsumerRegistryOmitsExec(t *testing.T) {

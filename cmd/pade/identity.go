@@ -7,7 +7,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	cursorid "github.com/ksteffe/pade/internal/identity/cursor"
+	cursorid "github.com/After-Certainty/pade/internal/identity/cursor"
 	"github.com/spf13/cobra"
 )
 

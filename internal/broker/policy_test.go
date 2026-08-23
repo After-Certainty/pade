@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/broker"
+	"github.com/After-Certainty/pade/internal/broker"
 )
 
 func TestPolicyRejectsUnknownFields(t *testing.T) {
@@ -17,7 +17,7 @@ oidc:
 policies:
   - subject: "user:42"
     requireRepoUrl: true
-    repositories: ["github.com/ksteffe/pade"]
+    repositories: ["github.com/After-Certainty/pade"]
     capabilities: ["github.user.read"]
 `))
 	if err == nil {
@@ -37,7 +37,7 @@ oidc:
   audience: https://pade-broker.local
 policies:
   - subject: "user:42"
-    repositories: ["github.com/ksteffe/pade"]
+    repositories: ["github.com/After-Certainty/pade"]
     capabilities: ["github.user.read"]
 `))
 	if err == nil {

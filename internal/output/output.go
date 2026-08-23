@@ -6,9 +6,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/manifest"
-	"github.com/ksteffe/pade/internal/planner"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/manifest"
+	"github.com/After-Certainty/pade/internal/planner"
 )
 
 // WriteJSON encodes v as indented JSON.

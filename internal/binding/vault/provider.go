@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/securehttp"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/securehttp"
 )
 
 // Provider resolves capabilities from HashiCorp Vault KV secrets.

@@ -92,7 +92,7 @@ capabilities:
       config:
         tokenEnv: GITHUB_TOKEN
         repositories:
-          - ksteffe/pade
+          - After-Certainty/pade
         permissions:
           metadata: read
           contents: read
@@ -128,7 +128,7 @@ EOF
   echo "=== two-provider: resolve github.repo.read via broker ==="
   "$PADE" exec -f "${TMP}/pade.yaml" --bindings "$PADE_BINDINGS" \
     --capability github.repo.read --quiet -- \
-    env GITHUB_REPOSITORY=ksteffe/pade "${ROOT}/examples/demo-project/scripts/github-repo-meta"
+    env GITHUB_REPOSITORY=After-Certainty/pade "${ROOT}/examples/demo-project/scripts/github-repo-meta"
 
   echo "=== two-provider: resolve google-analytics.read via broker ==="
   "$PADE" exec -f "${TMP}/pade.yaml" --bindings "$PADE_BINDINGS" \
@@ -163,7 +163,7 @@ case "$MODE" in
     EXPECT="ghs_pade_fake_installation_token"
     CONFIG_YAML="        tokenEnv: GITHUB_TOKEN
         repositories:
-          - ksteffe/pade
+          - After-Certainty/pade
         permissions:
           metadata: read
           contents: read"
@@ -239,7 +239,7 @@ if [[ "$MODE" == "github" ]]; then
   echo "=== exec provider dogfood (github): repo-scoped validation (Milestone E; fake skips network) ==="
   "$PADE" exec -f "${TMP}/pade.yaml" --bindings "$PADE_BINDINGS" \
     --capability "${CAP}" --quiet -- \
-    env GITHUB_REPOSITORY=ksteffe/pade "$REPO_META"
+    env GITHUB_REPOSITORY=After-Certainty/pade "$REPO_META"
 fi
 
 if [[ "$MODE" == "ga" ]]; then

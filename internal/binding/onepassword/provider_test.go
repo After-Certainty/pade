@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	onepassword "github.com/ksteffe/pade/internal/binding/onepassword"
+	"github.com/After-Certainty/pade/internal/binding"
+	onepassword "github.com/After-Certainty/pade/internal/binding/onepassword"
 )
 
 func TestOnePasswordProbeAndResolve(t *testing.T) {

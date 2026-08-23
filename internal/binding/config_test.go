@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/binding"
-	envprovider "github.com/ksteffe/pade/internal/binding/env"
+	"github.com/After-Certainty/pade/internal/binding"
+	envprovider "github.com/After-Certainty/pade/internal/binding/env"
 )
 
 func TestParseEnvBinding(t *testing.T) {

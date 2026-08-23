@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding"
-	"github.com/ksteffe/pade/internal/broker"
-	"github.com/ksteffe/pade/internal/providerset"
-	"github.com/ksteffe/pade/internal/version"
+	"github.com/After-Certainty/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/broker"
+	"github.com/After-Certainty/pade/internal/providerset"
+	"github.com/After-Certainty/pade/internal/version"
 )
 
 func main() {

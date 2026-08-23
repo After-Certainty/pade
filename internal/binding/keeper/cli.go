@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ksteffe/pade/internal/binding/cliproc"
+	"github.com/After-Certainty/pade/internal/binding/cliproc"
 )
 
 func (p *Provider) resolveBin() (string, error) {

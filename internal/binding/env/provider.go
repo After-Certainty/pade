@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ksteffe/pade/internal/binding"
+	"github.com/After-Certainty/pade/internal/binding"
 )
 
 // Provider resolves capabilities from process environment variables by name.

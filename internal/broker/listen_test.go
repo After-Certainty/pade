@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ksteffe/pade/internal/broker"
+	"github.com/After-Certainty/pade/internal/broker"
 )
 
 func TestResolveListenAddr(t *testing.T) {

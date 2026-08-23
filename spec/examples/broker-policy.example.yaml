@@ -11,6 +11,6 @@ policies:
   - subject: "user:YOUR_CURSOR_USER_ID"
     requireRepoURLs: true
     repositories:
-      - github.com/ksteffe/pade
+      - github.com/After-Certainty/pade
     capabilities:
       - github.user.read

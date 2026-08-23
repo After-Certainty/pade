@@ -15,6 +15,8 @@ Navigation roots: [../README.md](../README.md) (current direction), [../ROADMAP.
 | [../DESIGN.md](../DESIGN.md) | Reference implementation design history |
 | [go-reference.md](go-reference.md) | Go reference Consumer/Broker design history (not Intent API version) |
 | [manifest-conventions.md](manifest-conventions.md) | DevelopmentSession apiVersion/kind/metadata/spec conventions |
+| [testing.md](testing.md) | Testing / dogfood taxonomy — CI mapping and subsystem → command matrix |
+| [broker-auth-security.md](broker-auth-security.md) | Broker OIDC/JWT/JWKS security posture (reference implementation) |
 | [devpod-dogfood.md](devpod-dogfood.md) | DevPod composition / Milestone 4 dogfood |
 | [identity-separation.md](identity-separation.md) | Identity separation / Milestone 5 dogfood |
 | [vault-dogfood.md](vault-dogfood.md) | Vault `-dev` capability resolution dogfood |
@@ -23,5 +25,5 @@ Navigation roots: [../README.md](../README.md) (current direction), [../ROADMAP.
 | [keeper-secrets-manager-dogfood.md](keeper-secrets-manager-dogfood.md) | Keeper Secrets Manager / Milestone 9 dogfood |
 | [cursor-cloud-dogfood.md](cursor-cloud-dogfood.md) | Cursor Cloud Agent + KSM composition (vendor-specific) |
 | [cursor-oidc-broker-dogfood.md](cursor-oidc-broker-dogfood.md) | Phase 2 Cursor OIDC broker dogfood (Stage B KSM/exec, external deploy status) |
-| [release.md](release.md) | Versioned releases (`v0.1.0`; `workflow_dispatch`) |
+| [release.md](release.md) | Versioned releases (`v0.1.0`; `workflow_dispatch`; module path from `v0.2.0`) |
 | [teleport-ingress.md](teleport-ingress.md) | Teleport Application Access / Milestone 8 ingress spike |

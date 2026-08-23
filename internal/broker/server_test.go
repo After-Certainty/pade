@@ -18,18 +18,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/After-Certainty/pade/internal/binding"
+	keepersm "github.com/After-Certainty/pade/internal/binding/keepersm"
+	"github.com/After-Certainty/pade/internal/broker"
+	"github.com/After-Certainty/pade/internal/providerset"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/ksteffe/pade/internal/binding"
-	keepersm "github.com/ksteffe/pade/internal/binding/keepersm"
-	"github.com/ksteffe/pade/internal/broker"
-	"github.com/ksteffe/pade/internal/providerset"
 )
 
 const (
 	testIssuer   = "https://api.cursor.com"
 	testAudience = "https://pade-broker.local"
 	testSubject  = "user:42"
-	testRepo     = "github.com/ksteffe/pade"
+	testRepo     = "github.com/After-Certainty/pade"
 )
 
 func TestPolicyAuthorize(t *testing.T) {
@@ -42,7 +42,7 @@ oidc:
 policies:
   - subject: "user:42"
     requireRepoURLs: true
-    repositories: ["github.com/ksteffe/pade"]
+    repositories: ["github.com/After-Certainty/pade"]
     capabilities: ["github.user.read"]
 `))
 	if err != nil {
@@ -89,7 +89,7 @@ oidc:
 policies:
   - subject: "user:42"
     requireRepoURLs: true
-    repositories: ["github.com/ksteffe/pade"]
+    repositories: ["github.com/After-Certainty/pade"]
     capabilities: ["github.user.read"]
 `))
 	if err != nil {
@@ -683,7 +683,7 @@ oidc:
 policies:
   - subject: "user:42"
     requireRepoURLs: true
-    repositories: ["github.com/ksteffe/pade"]
+    repositories: ["github.com/After-Certainty/pade"]
     capabilities: ["demo.derived"]
 `))
 	if err != nil {

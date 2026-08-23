@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ksteffe/pade/internal/securehttp"
+	"github.com/After-Certainty/pade/internal/securehttp"
 )
 
 func TestValidateURL(t *testing.T) {
