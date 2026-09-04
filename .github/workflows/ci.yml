@@ -94,4 +94,6 @@ jobs:
           install: "false"
 
       - name: Smoke pade-broker container image
-        run: mise run ci-container
+        # install: false skips mise-action tool install; --skip-tools prevents
+        # mise run from auto-installing [tools] (Go) for this Docker-only task.
+        run: mise run --skip-tools ci-container

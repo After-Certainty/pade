@@ -1,11 +1,15 @@
-# PADE developer/CI task runner (replaces mise.toml).
+# PADE developer/CI task runner (replaces Makefile).
 # Discover: mise tasks | Run: mise run <task>
-# Aggregates are sequential (settings.jobs = 1). Do not use mise run -j N on ci-*.
+# jobs = 1 is a global safety default: dogfoods share bin/, /tmp/pade-*, Vault :8200,
+# and Docker/process state. Aggregates also use ordered { task = "..." } steps.
+# Do not use mise run -j N on ci-* or dogfoods.
 
 [tools]
 go = "1.26.6"
 
 [settings]
+# Cap parallel task workers (mise default is 4). Keeps multi-task and depends
+# graphs from overlapping shared dogfood resources.
 jobs = 1
 
 [task_config]
@@ -61,16 +65,8 @@ description = "Build bin/pade and bin/pade-broker with version ldflags"
 run = """
 #!/usr/bin/env bash
 set -euo pipefail
-VERSION="${VERSION:-dev}"
-COMMIT="${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
-BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)}"
-LDFLAGS="-s -w \
-  -X github.com/After-Certainty/pade/internal/version.Version=${VERSION} \
-  -X github.com/After-Certainty/pade/internal/version.Commit=${COMMIT} \
-  -X github.com/After-Certainty/pade/internal/version.BuildTime=${BUILD_TIME}"
-mkdir -p bin
-go build -ldflags "$LDFLAGS" -o bin/pade ./cmd/pade
-go build -ldflags "$LDFLAGS" -o bin/pade-broker ./cmd/pade-broker
+chmod +x scripts/build.sh
+exec ./scripts/build.sh
 """
 
 [tasks.release-artifacts]
@@ -133,7 +129,7 @@ GITHUB_TOKEN=pade-demo-env-token \
   -- ./scripts/github-whoami
 """
 
-# --- CI aggregates (sequential; jobs=1) ---
+# --- CI aggregates (ordered run steps; global jobs=1) ---
 
 [tasks.ci-unit]
 description = "Mirror GitHub Actions unit job (primary Go toolchain)"
@@ -165,16 +161,8 @@ case "$v" in
     ;;
 esac
 go test ./...
-VERSION="${VERSION:-dev}"
-COMMIT="${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
-BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)}"
-LDFLAGS="-s -w \
-  -X github.com/After-Certainty/pade/internal/version.Version=${VERSION} \
-  -X github.com/After-Certainty/pade/internal/version.Commit=${COMMIT} \
-  -X github.com/After-Certainty/pade/internal/version.BuildTime=${BUILD_TIME}"
-mkdir -p bin
-go build -ldflags "$LDFLAGS" -o bin/pade ./cmd/pade
-go build -ldflags "$LDFLAGS" -o bin/pade-broker ./cmd/pade-broker
+chmod +x scripts/build.sh
+exec ./scripts/build.sh
 """
 
 [tasks.ci-smoke-examples]
