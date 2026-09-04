@@ -38,7 +38,9 @@ spec/
 scripts/
 .cursor/
 *.md
-Makefile
+mise.toml
+mise.lock
+mise/
 .dockerignore
 Dockerfile
 LICENSE

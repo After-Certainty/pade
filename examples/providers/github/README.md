@@ -28,7 +28,7 @@ All GitHub-specific behavior (App JWT, installation id, permissions, expiry) bel
 ```bash
 go test ./examples/providers/github/
 go build -o ../../../bin/pade-provider-github .
-PADE_PROVIDER_FAKE=1 make dogfood-exec-provider-github
+PADE_PROVIDER_FAKE=1 mise run dogfood-exec-provider-github
 ```
 
 Live App credentials are **not** required for CI. For a real install:

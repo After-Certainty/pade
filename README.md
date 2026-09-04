@@ -80,10 +80,20 @@ GitHub repository: [`After-Certainty/pade`](https://github.com/After-Certainty/p
 
 ## Quick start
 
-Requires **Go 1.22+**. macOS Homebrew `go` 1.13 will fail with errors like `cannot load embed` — that toolchain predates the `embed` standard library.
+Requires **Go 1.22+** (primary toolchain **Go 1.26.6**). Install [mise](https://mise.jdx.dev/) for toolchain + task management:
 
 ```bash
-export PATH="$(pwd)/.tools/go/bin:$PATH"
+mise install          # Go 1.26.6 from mise.toml / mise.lock
+mise tasks            # discover developer tasks
+mise run test
+mise run validate
+mise run plan
+mise run ci           # local mirror of GitHub unit + smoke jobs
+```
+
+Or invoke Go directly after `mise install` (or with any Go 1.22+ on `PATH`):
+
+```bash
 go version   # expect go1.22+
 go test ./...
 go run ./cmd/pade validate -f spec/examples/web-app.yaml
@@ -94,15 +104,6 @@ GA_PROPERTY_ID=demo GOOGLE_APPLICATION_CREDENTIALS=/tmp/x \
   go run ./cmd/pade exec -f spec/examples/web-app.yaml \
   --bindings spec/examples/bindings.example.yaml \
   --capability google-analytics.read -- /bin/sh -c 'test -n "$GA_PROPERTY_ID" && echo ok'
-```
-
-Or use Make (auto-selects `.tools/go` when present):
-
-```bash
-make test
-make validate
-make plan
-make ci          # local mirror of GitHub unit + smoke jobs
 ```
 
 ## Current status
@@ -116,42 +117,42 @@ Dogfood and learning milestones (not the product definition):
 - **Environment lifecycle** — DevPod (or equivalent) owns workspace create/SSH/ports/prebuilds; PADE does not reimplement that.
 
 ```bash
-make dogfood     # PADE smoke against examples/demo-project
-make dogfood-identity  # Milestone 5: Alice/Bob bindings against the same pade.yaml
-make dogfood-vault     # Vault -dev resolution (+ Alice/Bob KV paths; prototype only)
-make dogfood-onepassword  # Milestone 6: 1Password CLI adapter (fake-op shim in CI)
-make install-onepassword-cli  # install real `op` (Homebrew or .tools/op)
-make dogfood-onepassword-live  # local only: real 1Password + real GitHub API
-make dogfood-keeper       # Milestone 7: Keeper Commander adapter (fake-keeper shim in CI)
-make install-keeper-cli   # install real `keeper` (Homebrew or .tools/keeper-venv)
-make dogfood-keeper-live  # local only: real Keeper + real GitHub API
-make dogfood-ksm          # Milestone 9: Keeper Secrets Manager (PADE_KSM_FAKE=1 in CI)
-make dogfood-ksm-live     # local / Cursor Cloud: real KSM + real GitHub API
-make dogfood-broker       # Phase 2: fake Cursor OIDC + pade-broker + fake KSM
-make dogfood-broker-stage-b  # Stage B: real Cursor OIDC + local broker + fake KSM (Cloud Agent only)
-make dogfood-broker-stage-b-exec  # Stage B exec: real OIDC + exec providers (Cloud Agent only)
-make dogfood-exec-provider   # Milestone B–C: broker-side provider: exec stub
-make dogfood-exec-provider-github   # Milestone D–E: GitHub App provider (fake CI + repo-meta)
-make dogfood-exec-provider-ga   # Milestone F: Google SA provider (fake CI + property-meta)
-make dogfood-exec-provider-two   # Milestone G: GitHub + GA same seam (CI)
-make smoke-broker-container  # Docker image smoke: healthz + unauthenticated resolve deny
-make dogfood-ingress-teleport  # Milestone 8 spike: Teleport Application Access (host; Docker optional)
-make dogfood-ingress-teleport-down
-make dogfood-devpod  # optional: full DevPod proof (needs docker + devpod)
+mise run dogfood     # PADE smoke against examples/demo-project
+mise run dogfood-identity  # Milestone 5: Alice/Bob bindings against the same pade.yaml
+mise run dogfood-vault     # Vault -dev resolution (+ Alice/Bob KV paths; prototype only)
+mise run dogfood-onepassword  # Milestone 6: 1Password CLI adapter (fake-op shim in CI)
+mise run install-onepassword-cli  # install real `op` (Homebrew or .tools/op)
+mise run dogfood-onepassword-live  # local only: real 1Password + real GitHub API
+mise run dogfood-keeper       # Milestone 7: Keeper Commander adapter (fake-keeper shim in CI)
+mise run install-keeper-cli   # install real `keeper` (Homebrew or .tools/keeper-venv)
+mise run dogfood-keeper-live  # local only: real Keeper + real GitHub API
+mise run dogfood-ksm          # Milestone 9: Keeper Secrets Manager (PADE_KSM_FAKE=1 in CI)
+mise run dogfood-ksm-live     # local / Cursor Cloud: real KSM + real GitHub API
+mise run dogfood-broker       # Phase 2: fake Cursor OIDC + pade-broker + fake KSM
+mise run dogfood-broker-stage-b  # Stage B: real Cursor OIDC + local broker + fake KSM (Cloud Agent only)
+mise run dogfood-broker-stage-b-exec  # Stage B exec: real OIDC + exec providers (Cloud Agent only)
+mise run dogfood-exec-provider   # Milestone B–C: broker-side provider: exec stub
+mise run dogfood-exec-provider-github   # Milestone D–E: GitHub App provider (fake CI + repo-meta)
+mise run dogfood-exec-provider-ga   # Milestone F: Google SA provider (fake CI + property-meta)
+mise run dogfood-exec-provider-two   # Milestone G: GitHub + GA same seam (CI)
+mise run smoke-broker-container  # Docker image smoke: healthz + unauthenticated resolve deny
+mise run dogfood-ingress-teleport  # Milestone 8 spike: Teleport Application Access (host; Docker optional)
+mise run dogfood-ingress-teleport-down
+mise run dogfood-devpod  # optional: full DevPod proof (needs docker + devpod)
 ```
 
 CI runs on pushes to `main` and on pull requests via [`.github/workflows/ci.yml`](.github/workflows/ci.yml). For a maintainer index of **which tests to run after changing a subsystem**, see [docs/testing.md](docs/testing.md).
 
-- **Unit tests** — `make ci-unit`: `gofmt` (all tracked `.go` files), `go mod verify`, `go vet`, shuffled `go test`, staticcheck, race detector, govulncheck, build
-- **Go 1.22 compatibility** — `make ci-compat` on Go 1.22 (`GOTOOLCHAIN=local`): `go test ./...` and `go build ./...` only
-- **Smoke** — `make ci-smoke`: example validate/plan/exec, identity dogfood, Vault `-dev` dogfood, 1Password dogfood, Keeper dogfood, KSM dogfood, broker OIDC dogfood, exec-provider dogfood (needs the unit job)
-- **Container smoke** — `make ci-container`: `docker build` the `pade-broker` image, start it with `-tls-termination=proxy` + `PORT`, require `GET /healthz` → 200 and unauthenticated `POST /v1/resolve` → 401 (logs dumped on failure; image is not pushed)
+- **Unit tests** — `mise run ci-unit`: `gofmt` (all tracked `.go` files), `go mod verify`, `go vet`, shuffled `go test`, staticcheck, race detector, govulncheck, build
+- **Go 1.22 compatibility** — `mise run ci-compat` on Go 1.22 (`GOTOOLCHAIN=local`): `go test ./...` and `go build ./...` only
+- **Smoke** — `mise run ci-smoke`: example validate/plan/exec, identity dogfood, Vault `-dev` dogfood, 1Password dogfood, Keeper dogfood, KSM dogfood, broker OIDC dogfood, exec-provider dogfood (needs the unit job)
+- **Container smoke** — `mise run ci-container`: `docker build` the `pade-broker` image, start it with `-tls-termination=proxy` + `PORT`, require `GET /healthz` → 200 and unauthenticated `POST /v1/resolve` → 401 (logs dumped on failure; image is not pushed)
 
 Pull requests also run [CodeQL](.github/workflows/codeql.yml) (Go) and [dependency review](.github/workflows/dependency-review.yml).
 
 Releases are **manual only**: [`.github/workflows/release.yml`](.github/workflows/release.yml) (`workflow_dispatch`). See [docs/release.md](docs/release.md).
 
-Local mirrors: `make ci` (unit + smoke on the local toolchain), `make ci-compat` (same commands GitHub runs on Go 1.22), `make smoke-broker-container` / `make ci-container` (Docker required). CodeQL, dependency review, and DevPod integration are GitHub-only.
+Local mirrors: `mise run ci` (unit + smoke on the local toolchain), `mise run ci-compat` (same commands GitHub runs on Go 1.22), `mise run smoke-broker-container` / `mise run ci-container` (Docker required). CodeQL, dependency review, and DevPod integration are GitHub-only.
 
 ### Cloud Run–style container listen (reference Broker)
 

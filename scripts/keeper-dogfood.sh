@@ -18,7 +18,7 @@ die() {
   exit 1
 }
 
-[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: make build)"
+[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: mise run build)"
 chmod +x "$FAKE_KEEPER"
 
 assert_no_secret_leak() {

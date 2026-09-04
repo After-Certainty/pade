@@ -67,15 +67,15 @@ resolve_go() {
   if [[ -n "${GO}" && -x "${GO}" ]]; then
     return
   fi
-  if [[ -x "${ROOT}/.tools/go/bin/go" ]]; then
-    GO="${ROOT}/.tools/go/bin/go"
-    return
-  fi
   if command -v go >/dev/null 2>&1; then
     GO="$(command -v go)"
     return
   fi
-  die "need Go 1.22+ (or .tools/go) to build/run ingress-demo"
+  if [[ -x "${ROOT}/.tools/go/bin/go" ]]; then
+    GO="${ROOT}/.tools/go/bin/go"
+    return
+  fi
+  die "need Go 1.22+ (mise install, or .tools/go fallback) to build/run ingress-demo"
 }
 
 detect_os_arch() {
@@ -203,7 +203,7 @@ Contrast:
   Gated via Teleport: ${APP_URL}
 
 Teardown:
-  make dogfood-ingress-teleport-down
+  mise run dogfood-ingress-teleport-down
 
 Docs: docs/teleport-ingress.md
 EOF
@@ -259,7 +259,7 @@ start_teleport_host() {
 cmd_up_host() {
   need_cmd curl
   [[ -f "${CONFIG_SRC}" ]] || die "missing ${CONFIG_SRC}"
-  [[ -x "${PADE}" ]] || die "pade binary not found at ${PADE} (run: make build)"
+  [[ -x "${PADE}" ]] || die "pade binary not found at ${PADE} (run: mise run build)"
 
   # On successful up, leave host processes running; only tear down on failure.
   trap 'rc=$?; if [[ $rc -ne 0 ]]; then cleanup_host; fi' EXIT
@@ -301,7 +301,7 @@ ensure_user_compose() {
 cmd_up_compose() {
   need_cmd docker
   need_cmd curl
-  [[ -x "${PADE}" ]] || die "pade binary not found at ${PADE} (run: make build)"
+  [[ -x "${PADE}" ]] || die "pade binary not found at ${PADE} (run: mise run build)"
   mkdir -p "${DATA_DIR}"
   "${PADE}" validate -f "${DEMO_DIR}/pade.yaml"
   echo "Starting Teleport ingress dogfood (compose mode; data: ${DATA_DIR})"

@@ -26,19 +26,19 @@ Protocol-affecting changes should be called out in the PR. Prefer documenting ex
 
 ## Development
 
-Requires **Go 1.22+**. Older toolchains (for example Homebrew Go 1.13) fail on `embed` and modern module requirements.
+Requires **Go 1.22+** (primary toolchain **Go 1.26.6** via [mise](https://mise.jdx.dev/)). Older toolchains (for example Homebrew Go 1.13) fail on `embed` and modern module requirements.
 
 ```bash
-# Prefer a current SDK on PATH, or the repo-local toolchain:
-export PATH="$(pwd)/.tools/go/bin:$PATH"
+# Install mise (https://mise.jdx.dev/), then:
+mise install          # Go 1.26.6 from mise.toml / mise.lock
+mise tasks            # discover tasks
+mise run test
+mise run ci           # local mirror of GitHub unit + smoke jobs (not container/CodeQL/DevPod)
 
+# Or invoke Go directly (after mise install / mise activate):
 go test ./...
 go run ./cmd/pade validate -f spec/examples/web-app.yaml
 go run ./cmd/pade plan -f spec/examples/web-app.yaml
-
-# Or:
-make test
-make ci   # local mirror of GitHub unit + smoke jobs (not container/CodeQL/DevPod)
 ```
 
 Pull requests and pushes to `main` run [`.github/workflows/ci.yml`](.github/workflows/ci.yml). GitHub additionally runs a Go 1.22 compatibility job, container smoke, CodeQL, and pull-request dependency review.

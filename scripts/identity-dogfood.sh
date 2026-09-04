@@ -11,7 +11,7 @@ ALICE_BINDINGS="$ROOT/examples/demo-project/identities/alice.bindings.yaml"
 BOB_BINDINGS="$ROOT/examples/demo-project/identities/bob.bindings.yaml"
 
 if [[ ! -x "$PADE" ]]; then
-  echo "error: pade binary not found at $PADE (run: make build)" >&2
+  echo "error: pade binary not found at $PADE (run: mise run build)" >&2
   exit 1
 fi
 

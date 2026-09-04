@@ -34,22 +34,22 @@ Broker policy and agent bindings use their own `version: "0.1"` configuration fo
 | Term | Meaning |
 |------|---------|
 | **Phase 2** | Cursor OIDC + experimental `pade-broker` spike (broader program) |
-| **Stage B (KSM)** | `make dogfood-broker-stage-b` — real OIDC + local broker + fake KSM + `github.user.read` (stage-1 baseline) |
-| **Stage B exec** | `make dogfood-broker-stage-b-exec` — real OIDC + local broker + exec providers for `github.repo.read` + `google-analytics.read` |
+| **Stage B (KSM)** | `mise run dogfood-broker-stage-b` — real OIDC + local broker + fake KSM + `github.user.read` (stage-1 baseline) |
+| **Stage B exec** | `mise run dogfood-broker-stage-b-exec` — real OIDC + local broker + exec providers for `github.repo.read` + `google-analytics.read` |
 | **External broker** | Broker hosted outside the agent VM (private deployment repo); live E2E documented in [ROADMAP.md](../ROADMAP.md) Milestones J–L |
 | **Milestones D–G** | Reference providers + two-provider seam ([ROADMAP.md](../ROADMAP.md)) |
 
 ## Fake CI dogfood (no Cursor / no Keeper)
 
 ```bash
-make dogfood-broker
+mise run dogfood-broker
 ```
 
-Starts an in-process JWKS + `pade-broker` with `PADE_KSM_FAKE=1`, mints a test JWT matching broker policy, and runs `pade exec` through `provider: broker`. Included in `make ci-smoke`.
+Starts an in-process JWKS + `pade-broker` with `PADE_KSM_FAKE=1`, mints a test JWT matching broker policy, and runs `pade exec` through `provider: broker`. Included in `mise run ci-smoke`.
 
 ## Stage A — Cursor identity proof (real Cloud Agent)
 
-One-time: build PADE in the Cloud Agent environment (`make build` or `go build -o bin/pade ./cmd/pade`).
+One-time: build PADE in the Cloud Agent environment (`mise run build` or `go build -o bin/pade ./cmd/pade`).
 
 From a Cursor Cloud Agent VM (identity socket present):
 
@@ -81,8 +81,8 @@ real Cursor OIDC (identity socket)
 ```
 
 ```bash
-make dogfood-broker-stage-b
-# optional pin: PADE_STAGE_B_SUBJECT=user:<id> make dogfood-broker-stage-b
+mise run dogfood-broker-stage-b
+# optional pin: PADE_STAGE_B_SUBJECT=user:<id> mise run dogfood-broker-stage-b
 ```
 
 Not included in CI (requires a live Cursor identity socket). The script:
@@ -108,8 +108,8 @@ real Cursor OIDC (identity socket)
 ```
 
 ```bash
-make dogfood-broker-stage-b-exec
-# optional pin: PADE_STAGE_B_SUBJECT=user:<id> make dogfood-broker-stage-b-exec
+mise run dogfood-broker-stage-b-exec
+# optional pin: PADE_STAGE_B_SUBJECT=user:<id> mise run dogfood-broker-stage-b-exec
 # live provider APIs: PADE_PROVIDER_FAKE=0 + broker-side GITHUB_APP_* / GOOGLE_APPLICATION_CREDENTIALS
 ```
 
@@ -206,7 +206,7 @@ The repository root [`Dockerfile`](../Dockerfile) builds a production-oriented *
 
 ```bash
 docker build -t pade-broker:ci .
-make smoke-broker-container   # build + /healthz + unauthenticated /v1/resolve → 401
+mise run smoke-broker-container   # build + /healthz + unauthenticated /v1/resolve → 401
 ```
 
 Example run (trusted upstream TLS termination; mounts are deployment-specific):
@@ -224,7 +224,7 @@ docker run --rm -p 8080:8080 -e PORT=8080 \
 
 Probe `GET /healthz` (no auth). There is no Docker `HEALTHCHECK` (distroless has no curl); Cloud Run / Kubernetes should use the HTTP probe.
 
-The same image is intended for Cloud Run, Kubernetes ingress, reverse proxies, or local Docker. **In this repository:** container build, `-tls-termination=proxy`, and smoke tests are landed (`make smoke-broker-container`). **Outside this repository:** a private Cloud Run deployment with real policy, Secret Manager–mounted credentials, and exec providers consumes **released** broker images (`ghcr.io/ksteffe/pade-broker:v0.1.0` for J–K; `ghcr.io/after-certainty/pade-broker:v0.1.1` for Milestone M identity + WIF). That deploy also fulfills deployment-specific Vercel capabilities for consumer-repo Cloud Agents (ROADMAP Milestone L **DONE**) and subject-bound Material via downstream WIF/IAM (ROADMAP Milestone M **DONE**). Full Cursor iOS cloud-agent acceptance against a consumer repo is ROADMAP Milestone N **DONE**. **Do not commit broker URLs into this repository.**
+The same image is intended for Cloud Run, Kubernetes ingress, reverse proxies, or local Docker. **In this repository:** container build, `-tls-termination=proxy`, and smoke tests are landed (`mise run smoke-broker-container`). **Outside this repository:** a private Cloud Run deployment with real policy, Secret Manager–mounted credentials, and exec providers consumes **released** broker images (`ghcr.io/ksteffe/pade-broker:v0.1.0` for J–K; `ghcr.io/after-certainty/pade-broker:v0.1.1` for Milestone M identity + WIF). That deploy also fulfills deployment-specific Vercel capabilities for consumer-repo Cloud Agents (ROADMAP Milestone L **DONE**) and subject-bound Material via downstream WIF/IAM (ROADMAP Milestone M **DONE**). Full Cursor iOS cloud-agent acceptance against a consumer repo is ROADMAP Milestone N **DONE**. **Do not commit broker URLs into this repository.**
 
 Google Cloud Run is a deployment example (container listens via `PORT` with plaintext inside the platform; Cloud Run terminates external HTTPS). It is not a normative PADE dependency.
 

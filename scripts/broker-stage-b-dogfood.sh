@@ -28,7 +28,7 @@ die() {
 }
 
 need_bin() {
-  [[ -x "$1" ]] || die "$2 not found at $1 (run: make build)"
+  [[ -x "$1" ]] || die "$2 not found at $1 (run: mise run build)"
 }
 
 need_bin "$PADE" "pade"

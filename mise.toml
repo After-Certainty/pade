@@ -1,0 +1,226 @@
+# PADE developer/CI task runner (replaces mise.toml).
+# Discover: mise tasks | Run: mise run <task>
+# Aggregates are sequential (settings.jobs = 1). Do not use mise run -j N on ci-*.
+
+[tools]
+go = "1.26.6"
+
+[settings]
+jobs = 1
+
+[task_config]
+includes = ["mise/tasks/dogfood.toml"]
+
+# --- Quality / build ---
+
+[tasks.fmt-check]
+description = "Fail if tracked .go files need gofmt"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+unformatted="$(git ls-files -z '*.go' | xargs -0 gofmt -l)"
+if [ -n "$unformatted" ]; then
+  echo "The following files need gofmt:"
+  echo "$unformatted"
+  exit 1
+fi
+"""
+
+[tasks.vet]
+description = "go vet ./..."
+run = "go vet ./..."
+
+[tasks.test]
+description = "go test ./..."
+run = "go test ./..."
+
+[tasks.test-shuffle]
+description = "go test -shuffle=on ./..."
+run = "go test -shuffle=on ./..."
+
+[tasks.test-race]
+description = "go test -race ./..."
+run = "go test -race ./..."
+
+[tasks.mod-verify]
+description = "go mod verify"
+run = "go mod verify"
+
+[tasks.staticcheck]
+description = "staticcheck v0.6.1 via go run"
+env = { GOTOOLCHAIN = "go1.26.6" }
+run = "go run honnef.co/go/tools/cmd/staticcheck@v0.6.1 ./..."
+
+[tasks.govulncheck]
+description = "govulncheck v1.7.0 via go run"
+env = { GOTOOLCHAIN = "go1.26.6" }
+run = "go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 ./..."
+
+[tasks.build]
+description = "Build bin/pade and bin/pade-broker with version ldflags"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+VERSION="${VERSION:-dev}"
+COMMIT="${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
+BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)}"
+LDFLAGS="-s -w \
+  -X github.com/After-Certainty/pade/internal/version.Version=${VERSION} \
+  -X github.com/After-Certainty/pade/internal/version.Commit=${COMMIT} \
+  -X github.com/After-Certainty/pade/internal/version.BuildTime=${BUILD_TIME}"
+mkdir -p bin
+go build -ldflags "$LDFLAGS" -o bin/pade ./cmd/pade
+go build -ldflags "$LDFLAGS" -o bin/pade-broker ./cmd/pade-broker
+"""
+
+[tasks.release-artifacts]
+description = "Cross-compile release tarballs (VERSION=vX.Y.Z)"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/release-build.sh
+VERSION="${VERSION:?VERSION is required (e.g. v0.1.0)}"
+COMMIT="${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
+BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)}"
+GO="$(command -v go)"
+export VERSION COMMIT BUILD_TIME GO
+exec ./scripts/release-build.sh
+"""
+
+# --- Quick CLI demos ---
+
+[tasks.validate]
+description = "Validate spec/examples/web-app.yaml"
+run = "go run ./cmd/pade validate -f spec/examples/web-app.yaml"
+
+[tasks.plan]
+description = "Plan spec/examples/web-app.yaml"
+run = "go run ./cmd/pade plan -f spec/examples/web-app.yaml"
+
+[tasks.capabilities]
+description = "Capabilities for web-app example with example bindings"
+run = "go run ./cmd/pade capabilities -f spec/examples/web-app.yaml --bindings spec/examples/bindings.example.yaml"
+
+[tasks.exec-demo]
+description = "Process-scoped exec demo (no secret values printed)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+GA_PROPERTY_ID=demo-property \
+GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake-ga.json \
+./bin/pade exec \
+  -f spec/examples/web-app.yaml \
+  --bindings spec/examples/bindings.example.yaml \
+  --capability google-analytics.read \
+  -- /bin/sh -c 'test -n "$GA_PROPERTY_ID" && test -n "$GOOGLE_APPLICATION_CREDENTIALS" && echo exec-ok'
+"""
+
+[tasks.dogfood]
+description = "demo-project validate/plan/exec whoami (no DevPod)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x examples/demo-project/scripts/github-whoami
+./bin/pade validate -f examples/demo-project/pade.yaml
+./bin/pade plan -f examples/demo-project/pade.yaml --bindings examples/demo-project/bindings.example.yaml
+GITHUB_TOKEN=pade-demo-env-token \
+./bin/pade exec \
+  -f examples/demo-project/pade.yaml \
+  --bindings examples/demo-project/bindings.example.yaml \
+  --capability github.user.read \
+  -- ./scripts/github-whoami
+"""
+
+# --- CI aggregates (sequential; jobs=1) ---
+
+[tasks.ci-unit]
+description = "Mirror GitHub Actions unit job (primary Go toolchain)"
+run = [
+  { task = "mod-verify" },
+  { task = "fmt-check" },
+  { task = "vet" },
+  { task = "test-shuffle" },
+  { task = "staticcheck" },
+  { task = "test-race" },
+  { task = "govulncheck" },
+  { task = "build" },
+]
+
+[tasks.ci-compat]
+description = "Minimum Go 1.22: test + build with GOTOOLCHAIN=local"
+tools = { go = "1.22.12" }
+env = { GOTOOLCHAIN = "local" }
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+v="$(go env GOVERSION 2>/dev/null || true)"
+echo "ci-compat using: $(command -v go) ($v) GOTOOLCHAIN=${GOTOOLCHAIN:-}"
+case "$v" in
+  go1.22.*) ;;
+  *)
+    echo "error: ci-compat must run under Go 1.22.x; got $v" >&2
+    exit 1
+    ;;
+esac
+go test ./...
+VERSION="${VERSION:-dev}"
+COMMIT="${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
+BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)}"
+LDFLAGS="-s -w \
+  -X github.com/After-Certainty/pade/internal/version.Version=${VERSION} \
+  -X github.com/After-Certainty/pade/internal/version.Commit=${COMMIT} \
+  -X github.com/After-Certainty/pade/internal/version.BuildTime=${BUILD_TIME}"
+mkdir -p bin
+go build -ldflags "$LDFLAGS" -o bin/pade ./cmd/pade
+go build -ldflags "$LDFLAGS" -o bin/pade-broker ./cmd/pade-broker
+"""
+
+[tasks.ci-smoke-examples]
+description = "Example validate/plan/capabilities/exec trailer (part of ci-smoke)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+./bin/pade validate -f spec/examples/web-app.yaml
+./bin/pade plan -f spec/examples/web-app.yaml --json > /tmp/pade-plan.json
+./bin/pade capabilities -f spec/examples/web-app.yaml --bindings spec/examples/bindings.example.yaml --json > /tmp/pade-capabilities.json
+GA_PROPERTY_ID=demo-property \
+GOOGLE_APPLICATION_CREDENTIALS=/tmp/fake-ga.json \
+./bin/pade exec \
+  -f spec/examples/web-app.yaml \
+  --bindings spec/examples/bindings.example.yaml \
+  --capability google-analytics.read \
+  -- /bin/sh -c 'test -n "$GA_PROPERTY_ID" && test -n "$GOOGLE_APPLICATION_CREDENTIALS" && printf exec-ok'
+mkdir -p /tmp/pade-orch/.devcontainer
+printf '{}\\n' > /tmp/pade-orch/.devcontainer/devcontainer.json
+cp spec/examples/web-app-orchestrated.yaml /tmp/pade-orch/pade.yaml
+./bin/pade validate -f /tmp/pade-orch/pade.yaml
+./bin/pade plan -f /tmp/pade-orch/pade.yaml --json > /tmp/pade-orch-plan.json
+"""
+
+[tasks.ci-smoke]
+description = "Mirror GitHub Actions smoke job (deterministic dogfoods + examples)"
+run = [
+  { task = "build" },
+  { task = "dogfood" },
+  { task = "dogfood-identity" },
+  { task = "dogfood-vault" },
+  { task = "dogfood-onepassword" },
+  { task = "dogfood-keeper" },
+  { task = "dogfood-ksm" },
+  { task = "dogfood-broker" },
+  { task = "dogfood-exec-provider" },
+  { task = "dogfood-exec-provider-github" },
+  { task = "dogfood-exec-provider-ga" },
+  { task = "dogfood-exec-provider-two" },
+  { task = "ci-smoke-examples" },
+]
+
+[tasks.ci]
+description = "Local mirror of GitHub unit + smoke jobs (ci-unit then ci-smoke)"
+run = [
+  { task = "ci-unit" },
+  { task = "ci-smoke" },
+]

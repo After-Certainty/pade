@@ -10,8 +10,8 @@ The demo capability is **`github.user.read`** → env **`GITHUB_TOKEN`**.
 
 | Goal | Command | CI? |
 |------|---------|-----|
-| Fake-keeper smoke (no account) | `make dogfood-keeper` | Yes (Smoke job) |
-| **Real Keeper + real GitHub API** | `make dogfood-keeper-live` | **No** (local only) |
+| Fake-keeper smoke (no account) | `mise run dogfood-keeper` | Yes (Smoke job) |
+| **Real Keeper + real GitHub API** | `mise run dogfood-keeper-live` | **No** (local only) |
 
 Live path uses a single Commander resolve during `pade exec` (Commander startup/sync dominates latency). `ResolveMaterials` does not Probe after Resolve, so Commander is not contacted twice on the exec path.
 
@@ -29,7 +29,7 @@ This path only succeeds when:
 
 ```bash
 # 0. Install Keeper Commander (Homebrew, official macOS .pkg, or repo-local Python venv)
-make install-keeper-cli
+mise run install-keeper-cli
 
 # 1. Create a classic PAT: https://github.com/settings/tokens  (scope: read:user)
 
@@ -48,7 +48,7 @@ export KEEPER_RECORD_UID=<uid>
 ### Run
 
 ```bash
-make dogfood-keeper-live
+mise run dogfood-keeper-live
 ```
 
 Expected ending: `dogfood-keeper-live: ok` and a real `login: <your-github-username>` line (not `stub-user`).
@@ -58,7 +58,7 @@ Overrides: `KEEPER_RECORD_UID`, `PADE_KEEPER_BIN`, `PADE_KEEPER_BINDINGS`.
 ## Fake-keeper smoke (CI)
 
 ```bash
-make dogfood-keeper
+mise run dogfood-keeper
 ```
 
 Uses `scripts/fake-keeper.sh` and `pade-demo-*` stub tokens (no network call to Keeper or GitHub).

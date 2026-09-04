@@ -98,10 +98,11 @@ These rules apply to humans and coding agents:
 
 ## Tests and commands
 
-Requires Go 1.22+. If `go version` shows 1.13 (or similar), put a current SDK first on `PATH` (for example `$(pwd)/.tools/go/bin`) or run `make test`.
+Requires Go 1.22+ (primary **Go 1.26.6** via [mise](https://mise.jdx.dev/)). Install mise, then:
 
 ```bash
-export PATH="$(pwd)/.tools/go/bin:$PATH"
+mise install          # Go 1.26.6 from mise.toml / mise.lock
+mise tasks            # discover tasks
 go test ./...
 go run ./cmd/pade validate -f spec/examples/web-app.yaml
 go run ./cmd/pade plan -f spec/examples/web-app.yaml --json
@@ -110,36 +111,36 @@ GA_PROPERTY_ID=demo GOOGLE_APPLICATION_CREDENTIALS=/tmp/x \
   go run ./cmd/pade exec -f spec/examples/web-app.yaml \
   --bindings spec/examples/bindings.example.yaml \
   --capability google-analytics.read -- /bin/sh -c 'test -n "$GA_PROPERTY_ID" && echo ok'
-make ci-unit   # gofmt (tracked .go), mod verify, vet, shuffled tests, staticcheck, race, govulncheck, build
-make ci-compat # minimum Go: go test ./... and go build ./... (GitHub runs this on 1.22)
-make ci-smoke  # env/identity/Vault/op/keeper/ksm dogfood + example validate
-make ci   # local mirror of GitHub unit + smoke jobs (ci-unit then ci-smoke)
-make build   # bin/pade and bin/pade-broker (--version / -version)
-make release-artifacts   # VERSION=v0.1.0 — cross-compile dist/ (Milestone I)
-make dogfood   # examples/demo-project PADE smoke (no DevPod required)
-make dogfood-identity   # Milestone 5 Alice/Bob identity separation smoke
-make dogfood-vault   # Vault -dev capability resolution (+ Alice/Bob KV paths)
-make dogfood-onepassword   # Milestone 6 1Password CLI adapter (fake-op shim)
-make install-onepassword-cli  # install real `op` for live demos
-make dogfood-onepassword-live   # local real 1Password + GitHub API (not CI)
-make dogfood-keeper   # Milestone 7 Keeper Commander adapter (fake-keeper shim)
-make install-keeper-cli  # install real `keeper` for live demos
-make dogfood-keeper-live   # local real Keeper + GitHub API (not CI)
-make dogfood-ksm   # Milestone 9 Keeper Secrets Manager (PADE_KSM_FAKE=1)
-make dogfood-ksm-live   # local / Cursor Cloud: real KSM + GitHub API (not CI)
-make dogfood-broker   # Phase 2 spike: fake OIDC + pade-broker + fake KSM
-make dogfood-broker-stage-b   # Stage B: real Cursor OIDC + local broker (Cloud Agent; not CI)
-make dogfood-broker-stage-b-exec   # Stage B exec: real OIDC + github.repo.read + google-analytics.read (Cloud Agent; not CI)
-make dogfood-exec-provider   # Milestone B–C: broker-side provider: exec stub dogfood
-make dogfood-exec-provider-github   # Milestone D–E: GitHub App provider via broker (fake + httptest + repo-meta)
-make dogfood-exec-provider-ga   # Milestone F: Google Analytics provider via broker (fake + httptest + property-meta)
-make dogfood-exec-provider-two   # Milestone G: GitHub + GA on the same broker-side exec seam
-make smoke-broker-container   # Docker pade-broker image smoke (requires docker)
-make dogfood-ingress-teleport  # Milestone 8 Teleport Application Access (host; Docker optional)
-make dogfood-ingress-teleport-down
+mise run ci-unit   # gofmt (tracked .go), mod verify, vet, shuffled tests, staticcheck, race, govulncheck, build
+mise run ci-compat # minimum Go: go test ./... and go build ./... (GitHub runs this on 1.22)
+mise run ci-smoke  # env/identity/Vault/op/keeper/ksm dogfood + example validate
+mise run ci   # local mirror of GitHub unit + smoke jobs (ci-unit then ci-smoke)
+mise run build   # bin/pade and bin/pade-broker (--version / -version)
+mise run release-artifacts   # VERSION=v0.1.0 — cross-compile dist/ (Milestone I)
+mise run dogfood   # examples/demo-project PADE smoke (no DevPod required)
+mise run dogfood-identity   # Milestone 5 Alice/Bob identity separation smoke
+mise run dogfood-vault   # Vault -dev capability resolution (+ Alice/Bob KV paths)
+mise run dogfood-onepassword   # Milestone 6 1Password CLI adapter (fake-op shim)
+mise run install-onepassword-cli  # install real `op` for live demos
+mise run dogfood-onepassword-live   # local real 1Password + GitHub API (not CI)
+mise run dogfood-keeper   # Milestone 7 Keeper Commander adapter (fake-keeper shim)
+mise run install-keeper-cli  # install real `keeper` for live demos
+mise run dogfood-keeper-live   # local real Keeper + GitHub API (not CI)
+mise run dogfood-ksm   # Milestone 9 Keeper Secrets Manager (PADE_KSM_FAKE=1)
+mise run dogfood-ksm-live   # local / Cursor Cloud: real KSM + GitHub API (not CI)
+mise run dogfood-broker   # Phase 2 spike: fake OIDC + pade-broker + fake KSM
+mise run dogfood-broker-stage-b   # Stage B: real Cursor OIDC + local broker (Cloud Agent; not CI)
+mise run dogfood-broker-stage-b-exec   # Stage B exec: real OIDC + github.repo.read + google-analytics.read (Cloud Agent; not CI)
+mise run dogfood-exec-provider   # Milestone B–C: broker-side provider: exec stub dogfood
+mise run dogfood-exec-provider-github   # Milestone D–E: GitHub App provider via broker (fake + httptest + repo-meta)
+mise run dogfood-exec-provider-ga   # Milestone F: Google Analytics provider via broker (fake + httptest + property-meta)
+mise run dogfood-exec-provider-two   # Milestone G: GitHub + GA on the same broker-side exec seam
+mise run smoke-broker-container   # Docker pade-broker image smoke (requires docker)
+mise run dogfood-ingress-teleport  # Milestone 8 Teleport Application Access (host; Docker optional)
+mise run dogfood-ingress-teleport-down
 ```
 
-DevPod lifecycle is documented in [docs/devpod-dogfood.md](docs/devpod-dogfood.md) and [examples/demo-project/README.md](examples/demo-project/README.md). Do not add a PADE wrapper that reimplements `devpod up`. Full DevPod proof runs locally via `make dogfood-devpod` and in CI via [`.github/workflows/devpod-dogfood.yml`](.github/workflows/devpod-dogfood.yml) (separate from the fast main CI). Teleport ingress composition is documented in [docs/teleport-ingress.md](docs/teleport-ingress.md); do not add a PADE wrapper that reimplements Teleport Application Access. Keeper Secrets Manager / Cursor Cloud composition is documented in [docs/keeper-secrets-manager-dogfood.md](docs/keeper-secrets-manager-dogfood.md) and [docs/cursor-cloud-dogfood.md](docs/cursor-cloud-dogfood.md). Phase 2 broker composition is documented in [docs/cursor-oidc-broker-dogfood.md](docs/cursor-oidc-broker-dogfood.md). Do not put Cursor-specific config into portable Intent (`DevelopmentSession` / `pade.yaml`).
+DevPod lifecycle is documented in [docs/devpod-dogfood.md](docs/devpod-dogfood.md) and [examples/demo-project/README.md](examples/demo-project/README.md). Do not add a PADE wrapper that reimplements `devpod up`. Full DevPod proof runs locally via `mise run dogfood-devpod` and in CI via [`.github/workflows/devpod-dogfood.yml`](.github/workflows/devpod-dogfood.yml) (separate from the fast main CI). Teleport ingress composition is documented in [docs/teleport-ingress.md](docs/teleport-ingress.md); do not add a PADE wrapper that reimplements Teleport Application Access. Keeper Secrets Manager / Cursor Cloud composition is documented in [docs/keeper-secrets-manager-dogfood.md](docs/keeper-secrets-manager-dogfood.md) and [docs/cursor-cloud-dogfood.md](docs/cursor-cloud-dogfood.md). Phase 2 broker composition is documented in [docs/cursor-oidc-broker-dogfood.md](docs/cursor-oidc-broker-dogfood.md). Do not put Cursor-specific config into portable Intent (`DevelopmentSession` / `pade.yaml`).
 
 Treat [spec/pade.schema.json](spec/pade.schema.json) as the machine-readable Intent contract (`DevelopmentSession`). Update examples when the schema changes. See also [spec/README.md](spec/README.md) and [docs/manifest-conventions.md](docs/manifest-conventions.md).
 
@@ -149,8 +150,8 @@ Capability and runtime providers should be adapters behind small interfaces in t
 
 ## Cursor Cloud specific instructions
 
-- The reference implementation is a Go CLI (`bin/pade`, `bin/pade-broker`); there is no long-running dev server to keep up. "Running the app" means building and invoking the CLI (`make build`, then `make dogfood` for the quickest end-to-end capability flow).
-- The base image already ships Go 1.26.x, so the README/`Makefile` `.tools/go` PATH workaround for old system Go (1.13) is unnecessary here; `go`/`make` targets work as-is.
-- The startup update script runs `go mod download`. Lint targets fetch their tools on demand at run time (`make staticcheck` → `honnef.co/go/tools`, `make govulncheck` → `golang.org/x/vuln` via `go run ...@version`), and `make ci-smoke`/`make dogfood-vault` download a Vault dev binary into `.tools/` on first run — all require network egress the first time they run.
-- Fast local verification mirrors CI: `make ci-unit` (fmt, vet, shuffled tests, staticcheck, race, govulncheck, build) and `make ci-smoke` (all provider + broker + exec dogfoods). Both pass in this environment without secrets because provider adapters use fake shims / `PADE_KSM_FAKE=1`.
-- Live provider dogfoods (`*-live`, `dogfood-broker-stage-b*`) and `make smoke-broker-container` (Docker) are intentionally out of the default flow: they need real credentials, the Cursor OIDC identity socket, or Docker, none of which are provisioned by the update script.
+- The reference implementation is a Go CLI (`bin/pade`, `bin/pade-broker`); there is no long-running dev server to keep up. "Running the app" means building and invoking the CLI (`mise run build`, then `mise run dogfood` for the quickest end-to-end capability flow).
+- Install [mise](https://mise.jdx.dev/) if it is not already on `PATH`, then `mise install` (Go 1.26.6 from `mise.toml` / `mise.lock`). The base image may already ship Go 1.26.x; prefer `mise run` so the task runner and toolchain stay aligned.
+- The startup update script runs `go mod download`. Lint targets fetch their tools on demand at run time (`mise run staticcheck` → `honnef.co/go/tools`, `mise run govulncheck` → `golang.org/x/vuln` via `go run ...@version`), and `mise run ci-smoke`/`mise run dogfood-vault` download a Vault dev binary into `.tools/` on first run — all require network egress the first time they run.
+- Fast local verification mirrors CI: `mise run ci-unit` (fmt, vet, shuffled tests, staticcheck, race, govulncheck, build) and `mise run ci-smoke` (all provider + broker + exec dogfoods). Both pass in this environment without secrets because provider adapters use fake shims / `PADE_KSM_FAKE=1`.
+- Live provider dogfoods (`*-live`, `dogfood-broker-stage-b*`) and `mise run smoke-broker-container` (Docker) are intentionally out of the default flow: they need real credentials, the Cursor OIDC identity socket, or Docker, none of which are provisioned by the update script.

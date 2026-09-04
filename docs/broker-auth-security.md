@@ -94,7 +94,7 @@ Run after broker auth changes:
 
 ```bash
 go test ./internal/broker/... -count=1
-make dogfood-broker
+mise run dogfood-broker
 ```
 
 ## Non-goals (today)

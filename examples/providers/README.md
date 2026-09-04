@@ -18,11 +18,11 @@ Bindings always use **broker-side** `provider: exec`; the Consumer uses `provide
 
 | Make target | Mode | Notes |
 |-------------|------|-------|
-| `make dogfood-exec-provider` | Fake JWT + stub | CI |
-| `make dogfood-exec-provider-github` | Fake JWT + fake install token | CI; repo-meta script |
-| `make dogfood-exec-provider-ga` | Fake JWT + fake access token | CI; property-meta script |
-| `make dogfood-exec-provider-two` | Fake JWT + both providers | CI same-seam proof (Milestone G) |
-| `make dogfood-broker-stage-b-exec` | Real Cursor OIDC | Cloud Agent; default `PADE_PROVIDER_FAKE=1` |
+| `mise run dogfood-exec-provider` | Fake JWT + stub | CI |
+| `mise run dogfood-exec-provider-github` | Fake JWT + fake install token | CI; repo-meta script |
+| `mise run dogfood-exec-provider-ga` | Fake JWT + fake access token | CI; property-meta script |
+| `mise run dogfood-exec-provider-two` | Fake JWT + both providers | CI same-seam proof (Milestone G) |
+| `mise run dogfood-broker-stage-b-exec` | Real Cursor OIDC | Cloud Agent; default `PADE_PROVIDER_FAKE=1` |
 
 Set **`PADE_PROVIDER_FAKE=1`** on the broker process for offline/CI runs. Unset for live GitHub App / Google API derivation when broker-side credentials are configured.
 

@@ -1,5 +1,5 @@
 # Docker Compose variant: app URI uses the compose service name.
-# Prefer `make dogfood-ingress-teleport` (host binaries) when Docker is constrained.
+# Prefer `mise run dogfood-ingress-teleport` (host binaries) when Docker is constrained.
 # Self-signed Proxy TLS; local users use OTP MFA — not production-safe.
 version: v3
 teleport:

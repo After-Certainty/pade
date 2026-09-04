@@ -1125,9 +1125,9 @@ A minimal `pade-broker` and `provider: broker` binding now exist as a **spike**,
 - `pade identity` mints Cursor OIDC tokens and prints safe claims only.
 - `pade-broker` verifies JWTs against JWKS, applies server-owned subject/`repo_urls`/capability policy, and materializes via existing providers (including `keeper-secrets-manager`).
 - Agent bindings may point at the broker; `KSM_CONFIG` stays on the broker host in this mode.
-- Fake OIDC + fake KSM dogfood: `make dogfood-broker`.
+- Fake OIDC + fake KSM dogfood: `mise run dogfood-broker`.
 - Listener transport: loopback plaintext; broker-managed `-tls-cert`/`-tls-key`; or explicit `-tls-termination=proxy` behind a trusted upstream (Cloud Run–compatible). See `SECURITY.md`.
-- Container image: repo-root `Dockerfile` (distroless nonroot); smoke with `make smoke-broker-container`.
+- Container image: repo-root `Dockerfile` (distroless nonroot); smoke with `mise run smoke-broker-container`.
 - Direct Milestone 9 KSM mode remains supported and unchanged in intent.
 
 Still deferred in the spike itself: multi-tenant hosting, DB policy, JTI replay store, and replacing direct KSM mode. **Release automation** for versioned CLI/broker artifacts is landed under [ROADMAP.md](ROADMAP.md) Milestone I (`v0.1.0` cut).

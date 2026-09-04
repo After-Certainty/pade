@@ -4,7 +4,7 @@ Non-normative example that speaks the draft [`provider: exec`](../../../docs/pro
 
 ```bash
 go build -o ../../../bin/pade-provider-stub .
-make dogfood-exec-provider
+mise run dogfood-exec-provider
 ```
 
 This provider exists only to prove the seam. It is not part of the PADE standard.

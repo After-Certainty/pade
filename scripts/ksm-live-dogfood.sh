@@ -34,15 +34,15 @@ Set up Keeper Secrets Manager + GitHub, then re-run:
      # optional override:
      # export KSM_NOTATION="keeper://<uid>/field/password"
 
-  5. make dogfood-ksm-live
+  5. mise run dogfood-ksm-live
 EOF
 }
 
-[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: make build)"
+[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: mise run build)"
 chmod +x "$WHOAMI"
 
 if [[ "${PADE_KSM_FAKE:-}" == "1" || "${PADE_KSM_FAKE:-}" == "true" ]]; then
-  die "PADE_KSM_FAKE is set; refuse live dogfood (use make dogfood-ksm for fake path)"
+  die "PADE_KSM_FAKE is set; refuse live dogfood (use mise run dogfood-ksm for fake path)"
 fi
 
 if [[ -z "${KSM_CONFIG:-}" ]]; then

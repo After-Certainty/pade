@@ -23,7 +23,7 @@ die() {
   exit 1
 }
 
-[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: make build)"
+[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: mise run build)"
 
 echo "=== broker dogfood: starting fake JWKS + pade-broker ==="
 go run "$ROOT/scripts/broker-dogfood-helper" "$WORK" >"$HELPER_LOG" 2>&1 &

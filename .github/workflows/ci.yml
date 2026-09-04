@@ -23,14 +23,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
-          go-version: '1.26.x'
+          version: 2026.9.1
           cache: true
+          install_args: --locked --include-task-tools
 
       - name: Unit checks
-        run: make ci-unit
+        run: mise run ci-unit
 
   compat:
     name: Go 1.22 compatibility
@@ -42,16 +43,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Go 1.22
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
-          go-version: '1.22.x'
+          version: 2026.9.1
           cache: true
+          install_args: --locked --include-task-tools
 
       - name: Compatibility checks
-        env:
-          GOTOOLCHAIN: local
-        run: make ci-compat
+        run: mise run ci-compat
 
   smoke:
     name: Smoke
@@ -64,14 +64,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
-          go-version: '1.26.x'
+          version: 2026.9.1
           cache: true
+          install_args: --locked --include-task-tools
 
       - name: Smoke checks
-        run: make ci-smoke
+        run: mise run ci-smoke
 
   container-smoke:
     name: Container smoke
@@ -84,5 +85,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.9.1
+          cache: true
+          # Container smoke needs mise for task defs only; skip tool install.
+          install: "false"
+
       - name: Smoke pade-broker container image
-        run: make ci-container
+        run: mise run ci-container

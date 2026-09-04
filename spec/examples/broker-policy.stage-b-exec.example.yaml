@@ -1,7 +1,7 @@
 # Example Stage B exec broker policy for a Cursor Cloud Agent local proof.
 # Server-owned — not portable pade.yaml.
 #
-# Used by make dogfood-broker-stage-b-exec (real OIDC + exec providers).
+# Used by mise run dogfood-broker-stage-b-exec (real OIDC + exec providers).
 # Replace subject with your attested Cursor workload subject:
 #   pade identity --audience <BROKER_AUDIENCE>
 #

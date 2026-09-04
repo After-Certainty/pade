@@ -32,15 +32,15 @@ Prefer **digest pins** for production broker deploys. The release uploads `pade-
 ## Local builds
 
 ```bash
-make build
+mise run build
 ./bin/pade --version
 ./bin/pade-broker -version
 
-VERSION=v0.1.0 make release-artifacts
+VERSION=v0.1.0 mise run release-artifacts
 # artifacts under dist/v0.1.0/
 ```
 
-Development builds without `VERSION=…` report `dev` plus the current git short commit when linked via `make build`.
+Development builds without `VERSION=…` report `dev` plus the current git short commit when linked via `mise run build`.
 
 ## Consumer contract
 

@@ -9,7 +9,7 @@ Demo capability: **`github.user.read`** → **`GITHUB_TOKEN`**.
 ## Quick run
 
 ```bash
-make dogfood-vault
+mise run dogfood-vault
 ```
 
 Seeds shared + Alice/Bob KV secrets with `pade-demo-*` stub tokens, runs plan/capabilities/exec with ambient `GITHUB_TOKEN` unset, and asserts plan/capabilities JSON never contain seeded secret substrings.

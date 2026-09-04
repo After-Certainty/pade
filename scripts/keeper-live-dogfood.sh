@@ -34,7 +34,7 @@ resolve_keeper_bin() {
     KEEPER_BIN="$VENV_KEEPER"
     return
   fi
-  die "Keeper Commander not found. Run: make install-keeper-cli"
+  die "Keeper Commander not found. Run: mise run install-keeper-cli"
 }
 
 print_setup() {
@@ -45,7 +45,7 @@ Set up a real GitHub PAT in Keeper, then re-run:
      https://github.com/settings/tokens
 
   2. Install / sign in to Keeper Commander:
-     make install-keeper-cli
+     mise run install-keeper-cli
      keeper shell
      login <you@example.com>
      # recommended for non-interactive get:
@@ -57,7 +57,7 @@ Set up a real GitHub PAT in Keeper, then re-run:
 
   4. Export the UID and run:
      export KEEPER_RECORD_UID=<uid>
-     make dogfood-keeper-live
+     mise run dogfood-keeper-live
 
 Optional overrides: KEEPER_RECORD_UID, PADE_KEEPER_BIN, PADE_KEEPER_BINDINGS
 EOF
@@ -88,7 +88,7 @@ require_real_keeper() {
     die "PADE_KEEPER_BIN points at fake-keeper; unset it for the live Keeper demo"
   fi
   if [[ ! -x "$KEEPER_BIN" ]] && ! command -v "$KEEPER_BIN" >/dev/null 2>&1; then
-    die "Keeper Commander '$KEEPER_BIN' not found. Run: make install-keeper-cli"
+    die "Keeper Commander '$KEEPER_BIN' not found. Run: mise run install-keeper-cli"
   fi
 }
 
@@ -118,7 +118,7 @@ EOF
 }
 
 run_pade() {
-  [[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: make build)"
+  [[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: mise run build)"
   chmod +x "$WHOAMI"
   unset GITHUB_TOKEN || true
   export PADE_KEEPER_BIN="$KEEPER_BIN"

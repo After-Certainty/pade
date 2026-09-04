@@ -120,7 +120,7 @@ Rules:
 5. Do **not** put identity into portable Intent / Consumer `provider: broker` YAML.
 6. Shared organizational Material (Milestone L) remains valid when providers ignore `identity`.
 
-**Exercise in tests:** `TestExecForwardsVerifiedIdentity` / `TestExecOmitsIdentityWithoutContext` in `internal/binding/exec`, and `TestResolveForwardsVerifiedIdentityToExec` in `internal/broker` (fake OIDC → `/v1/resolve` → exec stdin). Fake-OIDC dogfood paths (`make dogfood-exec-provider*`, `make dogfood-broker`) continue to work; whenever broker verify succeeds for an exec binding, stdin includes `identity`.
+**Exercise in tests:** `TestExecForwardsVerifiedIdentity` / `TestExecOmitsIdentityWithoutContext` in `internal/binding/exec`, and `TestResolveForwardsVerifiedIdentityToExec` in `internal/broker` (fake OIDC → `/v1/resolve` → exec stdin). Fake-OIDC dogfood paths (`mise run dogfood-exec-provider*`, `mise run dogfood-broker`) continue to work; whenever broker verify succeeds for an exec binding, stdin includes `identity`.
 
 Clients cannot supply `command`, argv, or executable paths on the broker resolve request.
 
@@ -171,11 +171,11 @@ Dogfood runs through the broker:
 
 | Target | Identity | Provider material | CI |
 |--------|----------|-------------------|-----|
-| `make dogfood-exec-provider` (stub) | Fake JWT | Fake stub token | yes |
-| `make dogfood-exec-provider-github` | Fake JWT | Fake installation token + repo-meta | yes |
-| `make dogfood-exec-provider-ga` | Fake JWT | Fake access token + property-meta | yes |
-| `make dogfood-exec-provider-two` | Fake JWT | Both providers, one seam | yes |
-| `make dogfood-broker-stage-b-exec` | Real Cursor OIDC | Fake providers by default (`PADE_PROVIDER_FAKE=1`) | no (Cloud Agent) |
+| `mise run dogfood-exec-provider` (stub) | Fake JWT | Fake stub token | yes |
+| `mise run dogfood-exec-provider-github` | Fake JWT | Fake installation token + repo-meta | yes |
+| `mise run dogfood-exec-provider-ga` | Fake JWT | Fake access token + property-meta | yes |
+| `mise run dogfood-exec-provider-two` | Fake JWT | Both providers, one seam | yes |
+| `mise run dogfood-broker-stage-b-exec` | Real Cursor OIDC | Fake providers by default (`PADE_PROVIDER_FAKE=1`) | no (Cloud Agent) |
 | External broker E2E | Real Cursor OIDC | Real derived tokens | no (private deploy; ROADMAP J/K) |
 
 ```text

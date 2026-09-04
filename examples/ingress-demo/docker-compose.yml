@@ -1,6 +1,6 @@
 # Optional full-stack Compose path (Teleport image + demo).
 # Default dogfood uses host binaries — see scripts/teleport-ingress-dogfood.sh.
-# Usage: PADE_TELEPORT_MODE=compose make dogfood-ingress-teleport
+# Usage: PADE_TELEPORT_MODE=compose mise run dogfood-ingress-teleport
 services:
   ingress-demo:
     build: .

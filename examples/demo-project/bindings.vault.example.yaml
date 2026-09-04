@@ -1,6 +1,6 @@
 # Local Vault -dev bindings for the demo-project (prototype only; not production-safe).
 # Same portable capability names as pade.yaml — Vault is a binding, not part of the manifest.
-# Requires VAULT_ADDR + VAULT_TOKEN (see docs/vault-dogfood.md / make dogfood-vault).
+# Requires VAULT_ADDR + VAULT_TOKEN (see docs/vault-dogfood.md / mise run dogfood-vault).
 version: "0.1"
 
 capabilities:

@@ -4,7 +4,7 @@
 #   pade exec --capability github.user.read -- ./scripts/github-whoami
 #
 # Never prints GITHUB_TOKEN. Tokens with prefix "pade-demo-" are CI/fake stubs
-# and skip the network call so make dogfood stays offline-friendly.
+# and skip the network call so mise run dogfood stays offline-friendly.
 set -euo pipefail
 
 if [[ -z "${GITHUB_TOKEN:-}" ]]; then
@@ -37,7 +37,7 @@ http_code="$(
 
 if [[ "$http_code" != "200" ]]; then
   echo "error: GitHub API /user returned HTTP ${http_code}" >&2
-  echo "hint: store a valid PAT (read:user) and re-run make dogfood-onepassword-live, make dogfood-keeper-live, or make dogfood-ksm-live" >&2
+  echo "hint: store a valid PAT (read:user) and re-run mise run dogfood-onepassword-live, mise run dogfood-keeper-live, or mise run dogfood-ksm-live" >&2
   exit 1
 fi
 

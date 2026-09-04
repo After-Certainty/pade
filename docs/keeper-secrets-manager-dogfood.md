@@ -14,8 +14,8 @@ Bootstrap configuration comes from ambient **`KSM_CONFIG`** (base64-encoded boun
 
 | Goal | Command | CI? |
 |------|---------|-----|
-| Fake KSM smoke (no account) | `make dogfood-ksm` | Yes (Smoke job) |
-| **Real KSM + real GitHub API** | `make dogfood-ksm-live` | **No** (local / Cursor Cloud) |
+| Fake KSM smoke (no account) | `mise run dogfood-ksm` | Yes (Smoke job) |
+| **Real KSM + real GitHub API** | `mise run dogfood-ksm-live` | **No** (local / Cursor Cloud) |
 
 Cursor Cloud Agent composition (iOS → Cloud Agent → PADE → KSM → GitHub) is documented in [cursor-cloud-dogfood.md](cursor-cloud-dogfood.md).
 
@@ -36,7 +36,7 @@ keeperSecretsManager:
 ## Fake smoke (CI)
 
 ```bash
-make dogfood-ksm
+mise run dogfood-ksm
 ```
 
 Sets `PADE_KSM_FAKE=1` so the provider uses an in-process stub for known `pade-demo-*` UIDs (no network call to Keeper or GitHub). Also exercises Alice/Bob identity separation and stdout redaction.
@@ -53,7 +53,7 @@ Requires:
 ```bash
 export KSM_CONFIG="$(base64 -w0 ksm-config.json)"
 export KSM_RECORD_UID=<uid>
-make dogfood-ksm-live
+mise run dogfood-ksm-live
 ```
 
 Expected ending: `dogfood-ksm-live: ok` and a real `login: <your-github-username>` line (not `stub-user`).
