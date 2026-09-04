@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Local build of bin/pade and bin/pade-broker with version ldflags.
-# Uses go from PATH (mise task environment). Does not select or install a toolchain.
+# Uses go from PATH (mise task environment). Does not select or install a
+# toolchain, and does not honor an inherited GO override.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-GO="${GO:-go}"
+GO="$(command -v go)"
+: "${GO:?go not found on PATH}"
 VERSION="${VERSION:-dev}"
 COMMIT="${COMMIT:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
 BUILD_TIME="${BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)}"
