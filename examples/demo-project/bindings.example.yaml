@@ -17,14 +17,14 @@ capabilities:
   #     fields:
   #       token: GITHUB_TOKEN
 
-  # 1Password (see docs/onepassword-dogfood.md / make dogfood-onepassword-live):
+  # 1Password (see docs/onepassword-dogfood.md / mise run dogfood-onepassword-live):
   # github.user.read:
   #   provider: onepassword
   #   onepassword:
   #     refs:
   #       GITHUB_TOKEN: "op://pade-demo/pade-github/credential"
 
-  # Keeper Commander (see docs/keeper-dogfood.md / make dogfood-keeper):
+  # Keeper Commander (see docs/keeper-dogfood.md / mise run dogfood-keeper):
   # github.user.read:
   #   provider: keeper
   #   keeper:

@@ -10,8 +10,8 @@ The demo capability is **`github.user.read`** → env **`GITHUB_TOKEN`**.
 
 | Goal | Command | CI? |
 |------|---------|-----|
-| Fake-op smoke (no account) | `make dogfood-onepassword` | Yes (Smoke job) |
-| **Real 1Password + real GitHub API** | `make dogfood-onepassword-live` | **No** (local only) |
+| Fake-op smoke (no account) | `mise run dogfood-onepassword` | Yes (Smoke job) |
+| **Real 1Password + real GitHub API** | `mise run dogfood-onepassword-live` | **No** (local only) |
 
 ## Realistic live demo (your laptop)
 
@@ -26,7 +26,7 @@ This path only succeeds when:
 
 ```bash
 # 0. Install the 1Password CLI if needed (Homebrew, else downloads into .tools/op/)
-make install-onepassword-cli
+mise run install-onepassword-cli
 
 # 1. Create a classic PAT: https://github.com/settings/tokens  (scope: read:user)
 # 2. Sign in
@@ -41,7 +41,7 @@ op item create --category='API Credential' --title=pade-github --vault=pade-demo
 ### Run
 
 ```bash
-make dogfood-onepassword-live
+mise run dogfood-onepassword-live
 ```
 
 Expected ending: `dogfood-onepassword-live: ok` and a real `login: <your-github-username>` line (not `stub-user`).
@@ -51,7 +51,7 @@ Overrides: `OP_VAULT`, `OP_ITEM`, `OP_FIELD`, `PADE_ONEPASSWORD_BINDINGS`, `PADE
 ## Fake-op smoke (CI)
 
 ```bash
-make dogfood-onepassword
+mise run dogfood-onepassword
 ```
 
 Uses `scripts/fake-op.sh` and `pade-demo-*` stub tokens (no network call to GitHub).

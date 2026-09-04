@@ -76,7 +76,7 @@ install_via_pkg() {
     fi
     sleep 5
   done
-  echo "Package may still be installing. After it finishes, re-run: make install-keeper-cli"
+  echo "Package may still be installing. After it finishes, re-run: mise run install-keeper-cli"
   echo "Cached package: $pkg_path"
   return 1
 }
@@ -103,14 +103,14 @@ install_via_venv() {
 print_next_steps() {
   cat <<EOF
 
-Next (for make dogfood-keeper-live):
+Next (for mise run dogfood-keeper-live):
   1. Sign in (interactive):  keeper shell
      Then: login <you@example.com>
      Optional persistence: this-device persistent-login on && this-device register
   2. Store a GitHub PAT (read:user) in a Login record's password field
      (Keeper app or Commander). Note the record UID.
   3. Export:  export KEEPER_RECORD_UID=<uid>
-  4. Run:     make dogfood-keeper-live
+  4. Run:     mise run dogfood-keeper-live
 
 See docs/keeper-dogfood.md for details.
 EOF
@@ -162,7 +162,7 @@ main() {
 
   die "could not install Keeper Commander automatically.
 
-On macOS, install the official package (already downloaded under .tools/keeper/ if present), then re-run make install-keeper-cli:
+On macOS, install the official package (already downloaded under .tools/keeper/ if present), then re-run mise run install-keeper-cli:
   open .tools/keeper/keeper-commander-mac-*.pkg
 
 Docs: https://docs.keeper.io/keeperpam/commander-cli/commander-installation-setup/installation-on-mac"

@@ -116,7 +116,7 @@ GitHub
   downstream authorization
 ```
 
-Targets: `make dogfood-broker`, `make dogfood-broker-stage-b` (Cloud Agent, real OIDC + fake KSM).
+Targets: `mise run dogfood-broker`, `mise run dogfood-broker-stage-b` (Cloud Agent, real OIDC + fake KSM).
 
 ### Stage 2 — derived credentials (preferred pre-release proof)
 
@@ -135,7 +135,7 @@ Downstream APIs
   GitHub / Google (validation scripts only in PADE — not product GA logic)
 ```
 
-Targets: `make dogfood-exec-provider{,-github,-ga,-two}` (CI fake JWT); `make dogfood-broker-stage-b-exec` (Cloud Agent, real OIDC). Live external broker E2E is documented in [ROADMAP.md](../ROADMAP.md) J/K (private deployment, outside this repo).
+Targets: `mise run dogfood-exec-provider{,-github,-ga,-two}` (CI fake JWT); `mise run dogfood-broker-stage-b-exec` (Cloud Agent, real OIDC). Live external broker E2E is documented in [ROADMAP.md](../ROADMAP.md) J/K (private deployment, outside this repo).
 
 Preferred GitHub dogfood uses **`github.repo.read`** and repo-scoped validation—not `/user` whoami (installation tokens are not personal users).
 

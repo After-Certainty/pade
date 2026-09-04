@@ -4,11 +4,11 @@ Tiny Go HTTP app used by [docs/teleport-ingress.md](../../docs/teleport-ingress.
 
 ```bash
 # from repo root (host Teleport + Go demo; default)
-make dogfood-ingress-teleport
-make dogfood-ingress-teleport-down
+mise run dogfood-ingress-teleport
+mise run dogfood-ingress-teleport-down
 
 # optional Docker Compose stack
-PADE_TELEPORT_MODE=compose make dogfood-ingress-teleport
+PADE_TELEPORT_MODE=compose mise run dogfood-ingress-teleport
 ```
 
 - App: `http://127.0.0.1:8080/` (open)

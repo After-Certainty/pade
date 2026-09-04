@@ -8,7 +8,7 @@ Minimal repository used to dogfood the DevPod-first PADE flow:
 
 Demo capability (stage-1 PAT baseline): **`github.user.read`** (env: **`GITHUB_TOKEN`**).
 
-Preferred pre-release GitHub dogfood (Milestone E): derived **installation token** via [`examples/providers/github`](../providers/github/) and **`scripts/github-repo-meta`** (repo-scoped; not `/user` whoami). See `make dogfood-exec-provider-github`.
+Preferred pre-release GitHub dogfood (Milestone E): derived **installation token** via [`examples/providers/github`](../providers/github/) and **`scripts/github-repo-meta`** (repo-scoped; not `/user` whoami). See `mise run dogfood-exec-provider-github`.
 
 ## Layout
 
@@ -28,15 +28,15 @@ Preferred pre-release GitHub dogfood (Milestone E): derived **installation token
 ## Easiest path (from repo root)
 
 ```bash
-make dogfood                 # stub token injection (CI-friendly)
-make dogfood-identity
-make dogfood-vault
-make dogfood-onepassword     # fake-op shim
-make install-onepassword-cli # real `op` CLI (Homebrew / .tools/op)
-make dogfood-onepassword-live # local only: real op + real GitHub API
-make dogfood-keeper          # fake-keeper shim
-make install-keeper-cli      # real `keeper` CLI (Homebrew / .tools/keeper-venv)
-make dogfood-keeper-live     # local only: real Keeper + real GitHub API
+mise run dogfood                 # stub token injection (CI-friendly)
+mise run dogfood-identity
+mise run dogfood-vault
+mise run dogfood-onepassword     # fake-op shim
+mise run install-onepassword-cli # real `op` CLI (Homebrew / .tools/op)
+mise run dogfood-onepassword-live # local only: real op + real GitHub API
+mise run dogfood-keeper          # fake-keeper shim
+mise run install-keeper-cli      # real `keeper` CLI (Homebrew / .tools/keeper-venv)
+mise run dogfood-keeper-live     # local only: real Keeper + real GitHub API
 ```
 
 See [docs/onepassword-dogfood.md](../../docs/onepassword-dogfood.md) for storing a real PAT in 1Password, and [docs/keeper-dogfood.md](../../docs/keeper-dogfood.md) for the Keeper Commander adapter (including live setup).
@@ -44,7 +44,7 @@ See [docs/onepassword-dogfood.md](../../docs/onepassword-dogfood.md) for storing
 ## DevPod
 
 ```bash
-make dogfood-devpod
+mise run dogfood-devpod
 ```
 
 Details: [docs/devpod-dogfood.md](../../docs/devpod-dogfood.md).

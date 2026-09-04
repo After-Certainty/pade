@@ -39,7 +39,7 @@ Set up a real GitHub PAT in 1Password, then re-run:
      op read 'op://${OP_VAULT}/${OP_ITEM}/${OP_FIELD}'
 
   5. Run:
-     make dogfood-onepassword-live
+     mise run dogfood-onepassword-live
 
 Optional overrides: OP_VAULT, OP_ITEM, OP_FIELD, PADE_ONEPASSWORD_BINDINGS
 EOF
@@ -50,7 +50,7 @@ require_real_op() {
     die "PADE_OP_BIN points at fake-op; unset it for the live GitHub demo"
   fi
   if ! command -v "$OP_BIN" >/dev/null 2>&1; then
-    die "1Password CLI '$OP_BIN' not found. Run: make install-onepassword-cli"
+    die "1Password CLI '$OP_BIN' not found. Run: mise run install-onepassword-cli"
   fi
 
   if ! "$OP_BIN" whoami >/dev/null 2>&1; then
@@ -100,7 +100,7 @@ EOF
 }
 
 run_pade() {
-  [[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: make build)"
+  [[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: mise run build)"
   chmod +x "$WHOAMI"
   unset GITHUB_TOKEN || true
   export PADE_OP_BIN="$OP_BIN"

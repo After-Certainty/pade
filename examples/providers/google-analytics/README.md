@@ -40,7 +40,7 @@ All Google-specific authentication behavior belongs **here**, in opaque `exec.co
 ```bash
 go test ./examples/providers/google-analytics/
 go build -o ../../../bin/pade-provider-google-analytics .
-PADE_PROVIDER_FAKE=1 make dogfood-exec-provider-ga
+PADE_PROVIDER_FAKE=1 mise run dogfood-exec-provider-ga
 ```
 
 Live Google credentials are **not** required for CI. For a real install:

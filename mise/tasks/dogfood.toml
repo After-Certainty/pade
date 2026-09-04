@@ -1,0 +1,307 @@
+# Included task TOML (no [tasks.] prefix). See mise task_config.includes docs.
+
+# --- Deterministic dogfood (CI smoke subset) ---
+
+[dogfood-identity]
+description = "Alice/Bob identity separation smoke"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/identity-dogfood.sh
+PADE="$PWD/bin/pade" exec ./scripts/identity-dogfood.sh
+"""
+
+[dogfood-vault]
+description = "Vault -dev capability resolution"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/vault-dogfood.sh
+PADE="$PWD/bin/pade" exec ./scripts/vault-dogfood.sh
+"""
+
+[dogfood-onepassword]
+description = "1Password CLI adapter (fake-op shim)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/onepassword-dogfood.sh scripts/fake-op.sh
+PADE="$PWD/bin/pade" exec ./scripts/onepassword-dogfood.sh
+"""
+
+[dogfood-keeper]
+description = "Keeper Commander adapter (fake-keeper shim)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/keeper-dogfood.sh scripts/fake-keeper.sh
+PADE="$PWD/bin/pade" exec ./scripts/keeper-dogfood.sh
+"""
+
+[dogfood-ksm]
+description = "Keeper Secrets Manager (PADE_KSM_FAKE=1)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/ksm-dogfood.sh examples/demo-project/scripts/github-whoami
+PADE="$PWD/bin/pade" exec ./scripts/ksm-dogfood.sh
+"""
+
+[dogfood-broker]
+description = "Fake OIDC + pade-broker + fake KSM"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/broker-dogfood.sh
+PADE="$PWD/bin/pade" exec ./scripts/broker-dogfood.sh
+"""
+
+[dogfood-exec-provider]
+description = "Broker-side provider: exec stub dogfood"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/exec-provider-dogfood.sh
+PADE="$PWD/bin/pade" GO="$(command -v go)" exec ./scripts/exec-provider-dogfood.sh stub
+"""
+
+[dogfood-exec-provider-github]
+description = "GitHub App provider via broker (fake)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/exec-provider-dogfood.sh examples/demo-project/scripts/github-repo-meta
+PADE="$PWD/bin/pade" GO="$(command -v go)" exec ./scripts/exec-provider-dogfood.sh github
+"""
+
+[dogfood-exec-provider-ga]
+description = "Google Analytics provider via broker (fake)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/exec-provider-dogfood.sh examples/demo-project/scripts/ga-property-meta
+PADE="$PWD/bin/pade" GO="$(command -v go)" exec ./scripts/exec-provider-dogfood.sh ga
+"""
+
+[dogfood-exec-provider-two]
+description = "GitHub + GA on the same broker-side exec seam"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/exec-provider-dogfood.sh \
+  examples/demo-project/scripts/github-repo-meta \
+  examples/demo-project/scripts/ga-property-meta
+PADE="$PWD/bin/pade" GO="$(command -v go)" exec ./scripts/exec-provider-dogfood.sh two
+"""
+
+# --- Live / manual integration ---
+
+[dogfood-broker-stage-b]
+description = "Stage B: real Cursor OIDC + local broker (Cloud Agent; not CI)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/broker-stage-b-dogfood.sh
+PADE="$PWD/bin/pade" BROKER="$PWD/bin/pade-broker" exec ./scripts/broker-stage-b-dogfood.sh
+"""
+
+[dogfood-broker-stage-b-exec]
+description = "Stage B exec: real OIDC + github.repo.read + google-analytics.read"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/broker-stage-b-exec-dogfood.sh \
+  examples/demo-project/scripts/github-repo-meta \
+  examples/demo-project/scripts/ga-property-meta
+go build -o bin/pade-provider-github ./examples/providers/github
+go build -o bin/pade-provider-google-analytics ./examples/providers/google-analytics
+PADE="$PWD/bin/pade" BROKER="$PWD/bin/pade-broker" exec ./scripts/broker-stage-b-exec-dogfood.sh
+"""
+
+[smoke-broker-container]
+description = "Docker pade-broker image healthz + unauthenticated deny"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/broker-container-smoke.sh
+exec ./scripts/broker-container-smoke.sh
+"""
+
+[ci-container]
+description = "Alias for smoke-broker-container"
+run = [{ task = "smoke-broker-container" }]
+
+[install-keeper-cli]
+description = "Install Keeper Commander for live demos"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/install-keeper-cli.sh
+exec ./scripts/install-keeper-cli.sh
+"""
+
+[install-onepassword-cli]
+description = "Install 1Password CLI for live demos"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/install-onepassword-cli.sh
+exec ./scripts/install-onepassword-cli.sh
+"""
+
+[dogfood-onepassword-live]
+description = "Live 1Password + GitHub API (not CI)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/onepassword-live-dogfood.sh examples/demo-project/scripts/github-whoami
+PADE="$PWD/bin/pade" exec ./scripts/onepassword-live-dogfood.sh
+"""
+
+[dogfood-github-live]
+description = "Deprecated alias for dogfood-onepassword-live"
+run = [{ task = "dogfood-onepassword-live" }]
+
+[dogfood-keeper-live]
+description = "Live Keeper Commander + GitHub API (not CI)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/keeper-live-dogfood.sh examples/demo-project/scripts/github-whoami
+PADE="$PWD/bin/pade" exec ./scripts/keeper-live-dogfood.sh
+"""
+
+[dogfood-ksm-live]
+description = "Live Keeper Secrets Manager + GitHub API (not CI)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/ksm-live-dogfood.sh examples/demo-project/scripts/github-whoami
+PADE="$PWD/bin/pade" exec ./scripts/ksm-live-dogfood.sh
+"""
+
+[dogfood-ingress-teleport]
+description = "Teleport Application Access ingress dogfood (up)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/teleport-ingress-dogfood.sh
+exec ./scripts/teleport-ingress-dogfood.sh up
+"""
+
+[dogfood-ingress-teleport-down]
+description = "Tear down Teleport ingress dogfood"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/teleport-ingress-dogfood.sh
+exec ./scripts/teleport-ingress-dogfood.sh down
+"""
+
+# --- DevPod ---
+
+[build-linux]
+description = "Cross-compile linux pade for DevPod VM"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh build
+"""
+
+[dogfood-devpod-check]
+description = "DevPod prerequisites check"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh check
+"""
+
+[dogfood-devpod-provider]
+description = "Ensure DevPod docker provider"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh provider
+"""
+
+[dogfood-devpod-up]
+description = "DevPod workspace up"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh up
+"""
+
+[dogfood-devpod-install]
+description = "Install linux pade into DevPod workspace"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh install
+"""
+
+[dogfood-devpod-smoke]
+description = "In-workspace PADE smoke"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh smoke
+"""
+
+[dogfood-devpod-down]
+description = "Stop DevPod workspace"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh down
+"""
+
+[dogfood-devpod-delete]
+description = "Delete DevPod workspace"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh delete
+"""
+
+[dogfood-devpod]
+description = "Full local DevPod proof (provider + up + install + smoke)"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh all
+"""
+
+[dogfood-devpod-ci]
+description = "DevPod CI entrypoint (all then delete)"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/devpod-dogfood.sh
+exec ./scripts/devpod-dogfood.sh ci
+"""

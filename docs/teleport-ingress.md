@@ -38,20 +38,20 @@ examples/ingress-demo  (:8080)
 Default path uses **host processes** (downloads a pinned Teleport Community Edition binary into `.tools/teleport/` if needed, runs the Go demo with the repo Go toolchain). Docker is optional.
 
 ```bash
-make dogfood-ingress-teleport
+mise run dogfood-ingress-teleport
 ```
 
 Optional Compose stack (Teleport image + demo containers):
 
 ```bash
-PADE_TELEPORT_MODE=compose make dogfood-ingress-teleport
+PADE_TELEPORT_MODE=compose mise run dogfood-ingress-teleport
 ```
 
 Teardown:
 
 ```bash
-make dogfood-ingress-teleport-down
-# or: PADE_TELEPORT_MODE=compose make dogfood-ingress-teleport-down
+mise run dogfood-ingress-teleport-down
+# or: PADE_TELEPORT_MODE=compose mise run dogfood-ingress-teleport-down
 ```
 
 Implementation: [scripts/teleport-ingress-dogfood.sh](../scripts/teleport-ingress-dogfood.sh).
@@ -84,4 +84,4 @@ On first boot the dogfood script creates (or reuses) a local Teleport user and p
 
 ## Follow-on
 
-A later milestone can explore **workload identity** for the running demo process (separate docs and Make targets when that work starts). That is complementary to—not a substitute for—human browser ingress via Teleport.
+A later milestone can explore **workload identity** for the running demo process (separate docs and mise tasks when that work starts). That is complementary to—not a substitute for—human browser ingress via Teleport.

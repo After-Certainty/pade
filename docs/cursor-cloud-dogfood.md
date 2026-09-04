@@ -51,7 +51,7 @@ Optional: commit a Cursor-only [`.cursor/environment.json`](https://cursor.com/d
 
 1. Portable `examples/demo-project/pade.yaml` is a `DevelopmentSession` that already declares `github.user.read` under `spec.capabilities`.
 2. Bindings example: `examples/demo-project/bindings.keeper-secrets-manager.example.yaml` (handles only).
-3. Build PADE in the Cloud Agent environment (`make build` or `go build -o bin/pade ./cmd/pade`).
+3. Build PADE in the Cloud Agent environment (`mise run build` or `go build -o bin/pade ./cmd/pade`).
 
 ## Desired run (from Cursor iOS)
 
@@ -67,7 +67,7 @@ After setup, start a Cloud Agent on the repo from iOS and run (or ask the agent 
 
 Expected: a real `login: <github-user>` line. You should not need to paste individual resource secrets (GitHub PAT) into Cursor — only the narrowly scoped KSM bootstrap.
 
-Local equivalent: `make dogfood-ksm-live` with `KSM_CONFIG` + `KSM_RECORD_UID` set.
+Local equivalent: `mise run dogfood-ksm-live` with `KSM_CONFIG` + `KSM_RECORD_UID` set.
 
 ## Manual verification checklist
 
@@ -92,9 +92,9 @@ Cursor Cloud Agents can mint short-lived OIDC JWTs from a local identity socket 
 
 | Path | When | Target |
 |------|------|--------|
-| Direct KSM on VM | Milestone 9 baseline; `KSM_CONFIG` on agent | This guide + `make dogfood-ksm-live` |
-| Local broker + KSM | Stage-1 broker proof; no agent `KSM_CONFIG` | `make dogfood-broker-stage-b` |
-| Local broker + exec | Derived-token proof (D–G); no agent vendor secrets | `make dogfood-broker-stage-b-exec` |
+| Direct KSM on VM | Milestone 9 baseline; `KSM_CONFIG` on agent | This guide + `mise run dogfood-ksm-live` |
+| Local broker + KSM | Stage-1 broker proof; no agent `KSM_CONFIG` | `mise run dogfood-broker-stage-b` |
+| Local broker + exec | Derived-token proof (D–G); no agent vendor secrets | `mise run dogfood-broker-stage-b-exec` |
 | External broker + exec | Private deployment; live APIs | ROADMAP J/K (outside this repo) |
 
 Portable `pade.yaml` stays capability-only; Cursor OIDC remains a runtime identity mechanism. See [cursor-oidc-broker-dogfood.md](cursor-oidc-broker-dogfood.md).

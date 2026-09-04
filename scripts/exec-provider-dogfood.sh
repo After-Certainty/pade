@@ -15,7 +15,7 @@ die() {
   exit 1
 }
 
-[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: make build)"
+[[ -x "$PADE" ]] || die "pade binary not found at $PADE (run: mise run build)"
 
 STUB_OUT="${ROOT}/bin/pade-provider-stub"
 GH_OUT="${ROOT}/bin/pade-provider-github"

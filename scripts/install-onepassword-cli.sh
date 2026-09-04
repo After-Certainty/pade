@@ -78,11 +78,11 @@ PY
 print_next_steps() {
   cat <<EOF
 
-Next (for make dogfood-onepassword-live):
+Next (for mise run dogfood-onepassword-live):
   1. Sign in:  op signin
      (or enable app integration: 1Password → Settings → Developer → Integrate with 1Password CLI)
   2. Store a GitHub PAT (read:user) — see docs/onepassword-dogfood.md
-  3. Run:     make dogfood-onepassword-live
+  3. Run:     mise run dogfood-onepassword-live
 EOF
 }
 

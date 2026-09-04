@@ -13,7 +13,9 @@ on:
       - "internal/**"
       - "go.mod"
       - "go.sum"
-      - "Makefile"
+      - "mise.toml"
+      - "mise.lock"
+      - "mise/tasks/**"
   pull_request:
     paths:
       - "examples/demo-project/**"
@@ -23,7 +25,9 @@ on:
       - "internal/**"
       - "go.mod"
       - "go.sum"
-      - "Makefile"
+      - "mise.toml"
+      - "mise.lock"
+      - "mise/tasks/**"
   workflow_dispatch:
 
 permissions:
@@ -48,11 +52,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      - name: Set up mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
-          go-version: '1.26.x'
+          version: 2026.9.1
           cache: true
+          install_args: --locked --include-task-tools
 
       - name: Install DevPod CLI
         run: |
@@ -68,8 +73,8 @@ jobs:
           docker info
 
       - name: Run DevPod dogfood
-        run: make dogfood-devpod-ci
+        run: mise run dogfood-devpod-ci
 
       - name: Cleanup DevPod workspace
         if: always()
-        run: make dogfood-devpod-delete || true
+        run: mise run dogfood-devpod-delete || true

@@ -21,10 +21,13 @@ linux_goarch() {
 }
 
 go_bin() {
-  if [[ -x "$ROOT/.tools/go/bin/go" ]]; then
+  # Prefer PATH go (mise-activated) over a leftover .tools/go unpack.
+  if command -v go >/dev/null 2>&1; then
+    command -v go
+  elif [[ -x "$ROOT/.tools/go/bin/go" ]]; then
     echo "$ROOT/.tools/go/bin/go"
   else
-    command -v go
+    return 1
   fi
 }
 
@@ -118,7 +121,7 @@ cmd_install() {
   cmd_build_linux
   [[ -f "$BIN_LINUX" ]] || die "missing $BIN_LINUX"
 
-  cid="$(resolve_container_id)" || die "could not find running container for workspace '$WORKSPACE' (is it up? try: make dogfood-devpod-up)"
+  cid="$(resolve_container_id)" || die "could not find running container for workspace '$WORKSPACE' (is it up? try: mise run dogfood-devpod-up)"
   echo "installing pade into container ${cid} via docker cp..."
   docker exec -u root "$cid" mkdir -p /home/vscode/bin
   docker cp "$BIN_LINUX" "${cid}:/home/vscode/bin/pade"
@@ -132,7 +135,7 @@ cmd_install() {
 cmd_smoke() {
   local cid
   cmd_check
-  cid="$(resolve_container_id)" || die "could not find running container for workspace '$WORKSPACE' (is it up? try: make dogfood-devpod-up)"
+  cid="$(resolve_container_id)" || die "could not find running container for workspace '$WORKSPACE' (is it up? try: mise run dogfood-devpod-up)"
   echo "running PADE smoke inside container ${cid}..."
   docker exec -u vscode -w /workspaces/demo-project \
     -e HOME=/home/vscode \
@@ -140,7 +143,7 @@ cmd_smoke() {
     "$cid" \
     bash -lc '
 set -euo pipefail
-command -v pade >/dev/null || { echo "pade not installed; run: make dogfood-devpod-install" >&2; exit 1; }
+command -v pade >/dev/null || { echo "pade not installed; run: mise run dogfood-devpod-install" >&2; exit 1; }
 chmod +x ./scripts/github-whoami 2>/dev/null || true
 pade validate
 pade plan --bindings bindings.example.yaml >/tmp/pade-plan.txt
@@ -173,8 +176,8 @@ cmd_all() {
   echo
   echo "DevPod dogfood complete."
   echo "  SSH:    devpod ssh $WORKSPACE"
-  echo "  Stop:   make dogfood-devpod-down"
-  echo "  Delete: make dogfood-devpod-delete"
+  echo "  Stop:   mise run dogfood-devpod-down"
+  echo "  Delete: mise run dogfood-devpod-delete"
 }
 
 # Non-interactive CI entrypoint: full dogfood then best-effort delete.

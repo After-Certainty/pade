@@ -24,10 +24,10 @@ Demo capability: **`github.user.read`** → **`GITHUB_TOKEN`**.
 ## Dogfood
 
 ```bash
-make dogfood-identity
+mise run dogfood-identity
 ```
 
-Vault / 1Password / Keeper variants: `make dogfood-vault`, `make dogfood-onepassword`, `make dogfood-keeper`. Realistic GitHub API paths (local only): `make dogfood-onepassword-live`, `make dogfood-keeper-live`.
+Vault / 1Password / Keeper variants: `mise run dogfood-vault`, `mise run dogfood-onepassword`, `mise run dogfood-keeper`. Realistic GitHub API paths (local only): `mise run dogfood-onepassword-live`, `mise run dogfood-keeper-live`.
 
 ## Out of scope for M5
 
