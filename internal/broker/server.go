@@ -22,8 +22,9 @@ const (
 
 // Server is the minimal PADE capability broker HTTP API.
 type Server struct {
-	Policy   *PolicyFile
-	Verifier *Verifier
+	Policy *PolicyFile
+	// Verifier verifies bearer JWTs (*Verifier or *VerifierSet).
+	Verifier OIDCVerifier
 	Registry *binding.Registry
 	Bindings *binding.Config
 	Logger   *log.Logger
@@ -148,13 +149,13 @@ func (s *Server) handleResolve(w http.ResponseWriter, r *http.Request) {
 
 	decAuthz := s.Policy.Authorize(claims, capability)
 	if !decAuthz.Allowed {
-		s.logf("decision=deny subject=%q capability=%q reason=%s repos=%v", claims.Subject, capability, decAuthz.Reason, sanitizeRepos(claims.RepoURLs))
+		s.logf("decision=deny issuer=%q subject=%q capability=%q reason=%s repos=%v", issuerLog(claims), claims.Subject, capability, decAuthz.Reason, sanitizeRepos(claims.RepoURLs))
 		s.writeError(w, http.StatusForbidden, "not_authorized")
 		return
 	}
 
 	if s.Registry == nil || s.Bindings == nil {
-		s.logf("decision=deny subject=%q capability=%q reason=bindings_unavailable", claims.Subject, capability)
+		s.logf("decision=deny issuer=%q subject=%q capability=%q reason=bindings_unavailable", issuerLog(claims), claims.Subject, capability)
 		s.writeError(w, http.StatusInternalServerError, "bindings_unavailable")
 		return
 	}
@@ -162,18 +163,20 @@ func (s *Server) handleResolve(w http.ResponseWriter, r *http.Request) {
 	// Forward broker-verified workload identity to trusted providers (e.g. exec).
 	// Only after successful Verify + Authorize; never log the raw token.
 	ctx = binding.WithVerifiedIdentity(ctx, binding.VerifiedIdentity{
-		Subject: claims.Subject,
-		IDToken: token,
+		Issuer:      claims.Issuer,
+		IssuerAlias: claims.IssuerAlias,
+		Subject:     claims.Subject,
+		IDToken:     token,
 	})
 
 	results, err := binding.ResolveMaterials(ctx, s.Registry, s.Bindings, []string{capability})
 	if err != nil {
 		if ctx.Err() != nil {
-			s.logf("decision=deny subject=%q capability=%q reason=resolve_timeout", claims.Subject, capability)
+			s.logf("decision=deny issuer=%q subject=%q capability=%q reason=resolve_timeout", issuerLog(claims), claims.Subject, capability)
 			s.writeError(w, http.StatusGatewayTimeout, "resolve_timeout")
 			return
 		}
-		s.logf("decision=deny subject=%q capability=%q reason=resolve_failed", claims.Subject, capability)
+		s.logf("decision=deny issuer=%q subject=%q capability=%q reason=resolve_failed", issuerLog(claims), claims.Subject, capability)
 		s.writeError(w, http.StatusBadGateway, "resolve_failed")
 		return
 	}
@@ -187,11 +190,18 @@ func (s *Server) handleResolve(w http.ResponseWriter, r *http.Request) {
 	for k, v := range results[0].Material.Env {
 		env[k] = v
 	}
-	s.logf("decision=allow subject=%q capability=%q cloud_agent=%q repos=%v", claims.Subject, capability, claims.CloudAgentID, sanitizeRepos(claims.RepoURLs))
+	s.logf("decision=allow issuer=%q subject=%q capability=%q cloud_agent=%q repos=%v", issuerLog(claims), claims.Subject, capability, claims.CloudAgentID, sanitizeRepos(claims.RepoURLs))
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Pragma", "no-cache")
 	_ = json.NewEncoder(w).Encode(resolveResponse{Env: env})
+}
+
+func issuerLog(c Claims) string {
+	if a := strings.TrimSpace(c.IssuerAlias); a != "" {
+		return a
+	}
+	return "legacy"
 }
 
 func bearerToken(h string) (string, bool) {

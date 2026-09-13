@@ -1,8 +1,8 @@
 # Broker authentication security posture
 
-Reference implementation notes for **Cursor OIDC JWT verification** and **JWKS fetching** in [`internal/broker/verify.go`](../internal/broker/verify.go). This documents the experimental `pade-broker` spike — not a normative PADE protocol requirement.
+Reference implementation notes for **OIDC JWT verification** (Cursor and Google/GCE trusted issuers) and **JWKS fetching** in [`internal/broker/verify.go`](../internal/broker/verify.go) / [`internal/broker/verifier_set.go`](../internal/broker/verifier_set.go). This documents the experimental `pade-broker` spike — not a normative PADE protocol requirement.
 
-Related: [SECURITY.md](../SECURITY.md), [spec/broker.md](../spec/broker.md), [cursor-oidc-broker-dogfood.md](cursor-oidc-broker-dogfood.md), [testing.md](testing.md).
+Related: [SECURITY.md](../SECURITY.md), [spec/broker.md](../spec/broker.md), [cursor-oidc-broker-dogfood.md](cursor-oidc-broker-dogfood.md), [gce-multi-issuer-dogfood.md](gce-multi-issuer-dogfood.md), [testing.md](testing.md).
 
 ## Trust boundary
 
@@ -14,9 +14,10 @@ Untrusted client                Trusted operator config
       v                                  v
 +--------------------------------------------------+
 | pade-broker                                       |
-|  1. Verify JWT (RS256, iss, aud, exp, max life)  |
-|  2. Authorize (policy rules)                      |
-|  3. Materialize capability (trusted providers)    |
+|  1. Select trusted issuer (static config only)  |
+|  2. Verify JWT (RS256, iss, aud, exp, max life) |
+|  3. Authorize (issuer alias + subject policy)   |
+|  4. Materialize capability (trusted providers)  |
 +--------------------------------------------------+
       |
       v
@@ -25,7 +26,9 @@ Downstream resource (final authorization)
 
 **Workload JWTs are untrusted** until cryptographically verified. Verification happens **before** policy authorization and **before** materialization.
 
-Consumer-side token minting ([`internal/identity/cursor`](../internal/identity/cursor/source.go)) does **not** verify JWTs — only the broker does.
+A broker may trust **multiple explicitly configured issuers** (`oidc.issuers`). An unverified JWT `iss` peek is used only as a lookup key into that static set — it never drives JWKS discovery, network access to unknown hosts, or authorization by itself. Each trusted issuer has its own issuer URL, audience, JWKS URL, and JWKS cache. Duplicate issuer URLs are rejected at policy load.
+
+Consumer-side token minting ([`internal/identity/cursor`](../internal/identity/cursor/source.go), [`internal/identity/gce`](../internal/identity/gce/source.go)) does **not** verify JWTs — only the broker does. `broker.identity` selects the Consumer TokenSource (`cursor` / `gce`); it is not broker OIDC config.
 
 ## Attacker model
 

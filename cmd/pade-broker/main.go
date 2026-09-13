@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -70,17 +71,22 @@ func main() {
 		log.Fatalf("bindings: %v", err)
 	}
 
-	jwksURL := pol.OIDC.JWKSURL
-	if jwksURL == "" {
-		jwksURL = "https://api.cursor.com/keys"
+	trusted, err := pol.TrustedIssuers()
+	if err != nil {
+		log.Fatalf("policy oidc: %v", err)
+	}
+	// Legacy single-issuer Cursor default JWKS only — do not invent JWKS for
+	// multi-issuer or non-Cursor issuers.
+	if !pol.MultiIssuer() && len(trusted) == 1 && trusted[0].JWKSURL == "" {
+		trusted[0].JWKSURL = "https://api.cursor.com/keys"
+	}
+	verifier, err := broker.NewVerifierSet(trusted)
+	if err != nil {
+		log.Fatalf("verifier: %v", err)
 	}
 	srv := &broker.Server{
-		Policy: pol,
-		Verifier: &broker.Verifier{
-			Issuer:   pol.OIDC.Issuer,
-			Audience: pol.OIDC.Audience,
-			JWKSURL:  jwksURL,
-		},
+		Policy:         pol,
+		Verifier:       verifier,
 		Registry:       providerset.Broker(),
 		Bindings:       bindCfg,
 		Logger:         log.New(os.Stderr, "pade-broker: ", log.LstdFlags),
@@ -91,7 +97,15 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	log.Printf("pade-broker listening on %s transport=%s (issuer=%s audience=%s)", addr, mode, pol.OIDC.Issuer, pol.OIDC.Audience)
+	issuerDesc := pol.OIDC.Issuer
+	if pol.MultiIssuer() {
+		aliases := make([]string, 0, len(pol.OIDC.Issuers))
+		for a := range pol.OIDC.Issuers {
+			aliases = append(aliases, a)
+		}
+		issuerDesc = "issuers=[" + strings.Join(aliases, ",") + "]"
+	}
+	log.Printf("pade-broker listening on %s transport=%s (%s)", addr, mode, issuerDesc)
 	if err := broker.ListenAndServe(ctx, listenCfg, srv.Handler()); err != nil && err != context.Canceled {
 		log.Fatal(err)
 	}

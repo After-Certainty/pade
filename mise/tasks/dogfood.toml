@@ -305,3 +305,13 @@ set -euo pipefail
 chmod +x scripts/devpod-dogfood.sh
 exec ./scripts/devpod-dogfood.sh ci
 """
+
+[dogfood-gce-multi-issuer]
+description = "Manual Experiment 005C: real GCE metadata identity + multi-issuer broker (not CI)"
+depends = ["build"]
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+chmod +x scripts/gce-multi-issuer-dogfood.sh
+PADE="$PWD/bin/pade" BROKER="$PWD/bin/pade-broker" exec ./scripts/gce-multi-issuer-dogfood.sh
+"""

@@ -99,6 +99,27 @@ capabilities:
 	}
 }
 
+func TestAcceptGCEBrokerIdentity(t *testing.T) {
+	t.Parallel()
+	cfg, err := binding.Parse([]byte(`
+version: "0.1"
+capabilities:
+  experiment.gce.identity:
+    provider: broker
+    broker:
+      endpoint: http://127.0.0.1:8787
+      audience: https://pade-broker.local
+      identity: gce
+`), "bindings.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := cfg.Capabilities["experiment.gce.identity"]
+	if b.Broker == nil || b.Broker.Identity != "gce" {
+		t.Fatalf("%+v", b.Broker)
+	}
+}
+
 func TestRejectRemoteHTTPBrokerEndpoint(t *testing.T) {
 	t.Parallel()
 	_, err := binding.Parse([]byte(`

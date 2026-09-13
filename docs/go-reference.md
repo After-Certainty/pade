@@ -28,7 +28,7 @@
 | **Consumer** | Interprets Intent; requests/uses authority | [`spec/consumer.md`](../spec/consumer.md) → [`cmd/pade`](../cmd/pade), [`internal/execution`](../internal/execution), [`internal/binding`](../internal/binding), [`internal/identity`](../internal/identity) |
 | **Broker** | Authn + server authz + materialization (experimental protocol) | [`spec/broker.md`](../spec/broker.md) → [`cmd/pade-broker`](../cmd/pade-broker), [`internal/broker`](../internal/broker) |
 | **Provider adapters** | env, Vault, 1Password, Keeper, Keeper Secrets Manager | packages under [`internal/binding`](../internal/binding) |
-| **Workload identity adapter** | Cursor OIDC (Broker authn dogfood) | [`internal/identity/cursor`](../internal/identity/cursor) |
+| **Workload identity adapters** | Cursor OIDC; GCE metadata identity (Broker authn dogfood) | [`internal/identity/cursor`](../internal/identity/cursor), [`internal/identity/gce`](../internal/identity/gce) |
 
 Local bindings YAML and the Go `Provider` interface are **reference implementation mechanisms**. Third-party Consumers or Brokers need not use those Go interfaces; they interoperate through the draft specifications (and, for broker mode, the experimental wire protocol documented in [spec/broker.md](../spec/broker.md)).
 

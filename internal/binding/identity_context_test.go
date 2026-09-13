@@ -19,8 +19,10 @@ func TestVerifiedIdentityFrom(t *testing.T) {
 		t.Fatal("expected absent identity when IDToken empty")
 	}
 	ctx := WithVerifiedIdentity(context.Background(), VerifiedIdentity{
-		Subject: "user:42",
-		IDToken: "eyJhbGciOiJSUzI1NiJ9.payload.sig",
+		Issuer:      "https://accounts.google.com",
+		IssuerAlias: "google",
+		Subject:     "user:42",
+		IDToken:     "eyJhbGciOiJSUzI1NiJ9.payload.sig",
 	})
 	got, ok := VerifiedIdentityFrom(ctx)
 	if !ok {
@@ -28,5 +30,8 @@ func TestVerifiedIdentityFrom(t *testing.T) {
 	}
 	if got.Subject != "user:42" || got.IDToken != "eyJhbGciOiJSUzI1NiJ9.payload.sig" {
 		t.Fatalf("got %+v", got)
+	}
+	if got.Issuer != "https://accounts.google.com" || got.IssuerAlias != "google" {
+		t.Fatalf("issuer fields %+v", got)
 	}
 }

@@ -7,11 +7,18 @@ import "context"
 // bearer JWT the client presented (not a newly minted token). Subject is the
 // broker-verified JWT sub and should match the token's sub when both are set.
 //
+// Issuer is the verified issuer URL. IssuerAlias is the operator-configured
+// trusted-issuer alias that verified the token (empty for legacy single-issuer
+// policies). Both are set only after successful broker verification — never
+// from an unverified JWT peek alone.
+//
 // Callers must not log IDToken. This type is for broker-side provider context
 // only — never encode it into portable Intent or Consumer bindings.
 type VerifiedIdentity struct {
-	Subject string
-	IDToken string
+	Issuer      string
+	IssuerAlias string
+	Subject     string
+	IDToken     string
 }
 
 type verifiedIdentityKey struct{}

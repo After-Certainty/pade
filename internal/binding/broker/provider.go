@@ -14,20 +14,25 @@ import (
 	"github.com/After-Certainty/pade/internal/binding"
 	"github.com/After-Certainty/pade/internal/identity"
 	cursorid "github.com/After-Certainty/pade/internal/identity/cursor"
+	gceid "github.com/After-Certainty/pade/internal/identity/gce"
 	"github.com/After-Certainty/pade/internal/securehttp"
 )
 
-// Provider resolves capabilities through a remote PADE broker using Cursor OIDC.
+// Provider resolves capabilities through a remote PADE broker using workload
+// identity (Cursor or GCE TokenSource selected by broker.identity).
 type Provider struct {
-	// TokenSource mints workload identity tokens. Defaults to Cursor.
+	// TokenSource mints workload identity tokens. When non-nil (tests, fake JWT),
+	// it wins over broker.identity selection.
 	TokenSource identity.TokenSource
 	// HTTPDo overrides HTTP (tests).
 	HTTPDo func(*http.Request) (*http.Response, error)
 }
 
 // New returns a broker binding provider.
+// TokenSource is left nil so Resolve selects from broker.identity, unless
+// PADE_BROKER_FAKE_JWT is set (dogfood override wins).
 func New() *Provider {
-	p := &Provider{TokenSource: cursorid.New()}
+	p := &Provider{}
 	if fake := strings.TrimSpace(os.Getenv("PADE_BROKER_FAKE_JWT")); fake != "" {
 		p.TokenSource = staticTokenSource{token: identity.Token{
 			Value:     fake,
@@ -81,7 +86,11 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 	}
 	src := p.TokenSource
 	if src == nil {
-		src = cursorid.New()
+		var err error
+		src, err = tokenSourceForIdentity(b.Broker.Identity)
+		if err != nil {
+			return nil, err
+		}
 	}
 	tok, err := src.Token(ctx, b.Broker.Audience)
 	if err != nil {
@@ -114,6 +123,17 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 		return nil, fmt.Errorf("broker resolve returned empty env")
 	}
 	return &binding.Material{Provider: p.Name(), Env: out.Env}, nil
+}
+
+func tokenSourceForIdentity(raw string) (identity.TokenSource, error) {
+	switch strings.TrimSpace(raw) {
+	case "", "cursor":
+		return cursorid.New(), nil
+	case "gce":
+		return gceid.New(), nil
+	default:
+		return nil, fmt.Errorf("unsupported broker.identity %q (want cursor or gce)", raw)
+	}
 }
 
 func requireConfig(b binding.CapabilityBinding) error {

@@ -19,16 +19,42 @@ type PolicyFile struct {
 }
 
 // OIDCConfig configures token verification.
+//
+// Legacy single-issuer form uses Issuer/Audience/JWKSURL at the top level.
+// Multi-issuer form uses Issuers (alias → config). The two forms are mutually
+// exclusive. Mode is derived from config shape (len(Issuers) > 0), not from a
+// separately mutated flag.
 type OIDCConfig struct {
+	Issuer   string                      `yaml:"issuer,omitempty"`
+	Audience string                      `yaml:"audience,omitempty"`
+	JWKSURL  string                      `yaml:"jwksURL,omitempty"`
+	Issuers  map[string]OIDCIssuerConfig `yaml:"issuers,omitempty"`
+}
+
+// OIDCIssuerConfig is one trusted issuer entry under oidc.issuers.
+type OIDCIssuerConfig struct {
 	Issuer   string `yaml:"issuer"`
 	Audience string `yaml:"audience"`
-	JWKSURL  string `yaml:"jwksURL,omitempty"`
+	JWKSURL  string `yaml:"jwksURL"`
+}
+
+// TrustedIssuer is the normalized operator-configured issuer used for
+// verification and authorization. Alias is empty for legacy single-issuer.
+type TrustedIssuer struct {
+	Alias    string
+	Issuer   string
+	Audience string
+	JWKSURL  string
 }
 
 // PolicyRule authorizes one subject (optionally confined to repos) for capabilities.
 // RequireRepoURLs is a pointer so omission is distinguishable from explicit false;
 // Validate requires the field to be set on every rule (fail closed).
+//
+// Issuer is an operator-defined trusted-issuer alias. Required in multi-issuer
+// mode; omitted (and ignored) in legacy single-issuer mode.
 type PolicyRule struct {
+	Issuer          string   `yaml:"issuer,omitempty"`
 	Subject         string   `yaml:"subject"`
 	RequireRepoURLs *bool    `yaml:"requireRepoURLs"`
 	Repositories    []string `yaml:"repositories"`
@@ -58,30 +84,85 @@ func ParsePolicy(data []byte) (*PolicyFile, error) {
 	return &p, nil
 }
 
+// MultiIssuer reports whether this policy uses the multi-issuer oidc.issuers form.
+// Derived from config shape so programmatic PolicyFile values behave consistently
+// without a separate Validate()-only mode flag.
+func (p *PolicyFile) MultiIssuer() bool {
+	if p == nil {
+		return false
+	}
+	return len(p.OIDC.Issuers) > 0
+}
+
+// TrustedIssuers returns the normalized trusted-issuer list.
+// Legacy single-issuer policies yield one entry with an empty Alias.
+// JWKSURL may still be empty in legacy mode (main applies the Cursor default).
+func (p *PolicyFile) TrustedIssuers() ([]TrustedIssuer, error) {
+	if p == nil {
+		return nil, fmt.Errorf("policy is nil")
+	}
+	if p.MultiIssuer() {
+		out := make([]TrustedIssuer, 0, len(p.OIDC.Issuers))
+		for alias, cfg := range p.OIDC.Issuers {
+			out = append(out, TrustedIssuer{
+				Alias:    strings.TrimSpace(alias),
+				Issuer:   strings.TrimSpace(cfg.Issuer),
+				Audience: strings.TrimSpace(cfg.Audience),
+				JWKSURL:  strings.TrimSpace(cfg.JWKSURL),
+			})
+		}
+		return out, nil
+	}
+	return []TrustedIssuer{{
+		Alias:    "",
+		Issuer:   strings.TrimSpace(p.OIDC.Issuer),
+		Audience: strings.TrimSpace(p.OIDC.Audience),
+		JWKSURL:  strings.TrimSpace(p.OIDC.JWKSURL),
+	}}, nil
+}
+
 // Validate checks structural policy requirements.
 func (p *PolicyFile) Validate() error {
 	if p.Version != "" && p.Version != "0.1" {
 		return fmt.Errorf("unsupported broker policy version %q", p.Version)
 	}
-	if strings.TrimSpace(p.OIDC.Issuer) == "" {
-		return fmt.Errorf("oidc.issuer is required")
-	}
-	if strings.TrimSpace(p.OIDC.Audience) == "" {
-		return fmt.Errorf("oidc.audience is required")
+	if err := p.validateOIDC(); err != nil {
+		return err
 	}
 	if len(p.Policies) == 0 {
 		return fmt.Errorf("at least one policy rule is required")
 	}
-	seenSubjects := make(map[string]struct{}, len(p.Policies))
+
+	multi := p.MultiIssuer()
+	type identityKey struct {
+		issuer  string
+		subject string
+	}
+	seen := make(map[identityKey]struct{}, len(p.Policies))
 	for i, rule := range p.Policies {
 		subj := strings.TrimSpace(rule.Subject)
 		if subj == "" {
 			return fmt.Errorf("policies[%d]: subject is required", i)
 		}
-		if _, dup := seenSubjects[subj]; dup {
+		alias := strings.TrimSpace(rule.Issuer)
+		if multi {
+			if alias == "" {
+				return fmt.Errorf("policies[%d]: issuer is required when oidc.issuers is configured", i)
+			}
+			if _, ok := p.OIDC.Issuers[alias]; !ok {
+				return fmt.Errorf("policies[%d]: unknown issuer alias %q", i, alias)
+			}
+		} else if alias != "" {
+			return fmt.Errorf("policies[%d]: issuer is only valid with oidc.issuers", i)
+		}
+		key := identityKey{issuer: alias, subject: subj}
+		if _, dup := seen[key]; dup {
+			if multi {
+				return fmt.Errorf("policies: duplicate issuer %q subject %q", alias, subj)
+			}
 			return fmt.Errorf("policies: duplicate subject %q", subj)
 		}
-		seenSubjects[subj] = struct{}{}
+		seen[key] = struct{}{}
 		if len(rule.Capabilities) == 0 {
 			return fmt.Errorf("policies[%d]: capabilities are required", i)
 		}
@@ -91,6 +172,52 @@ func (p *PolicyFile) Validate() error {
 		if *rule.RequireRepoURLs && len(rule.Repositories) == 0 {
 			return fmt.Errorf("policies[%d]: repositories required when requireRepoURLs is true", i)
 		}
+	}
+	return nil
+}
+
+func (p *PolicyFile) validateOIDC() error {
+	multi := p.MultiIssuer()
+	legacyIssuer := strings.TrimSpace(p.OIDC.Issuer)
+	legacyAudience := strings.TrimSpace(p.OIDC.Audience)
+	legacyJWKS := strings.TrimSpace(p.OIDC.JWKSURL)
+	legacySet := legacyIssuer != "" || legacyAudience != "" || legacyJWKS != ""
+
+	if multi && legacySet {
+		return fmt.Errorf("oidc: cannot set both legacy issuer/audience/jwksURL and issuers")
+	}
+	if !multi {
+		if legacyIssuer == "" {
+			return fmt.Errorf("oidc.issuer is required")
+		}
+		if legacyAudience == "" {
+			return fmt.Errorf("oidc.audience is required")
+		}
+		return nil
+	}
+
+	seenIssuerURLs := make(map[string]string, len(p.OIDC.Issuers))
+	for alias, cfg := range p.OIDC.Issuers {
+		a := strings.TrimSpace(alias)
+		if a == "" {
+			return fmt.Errorf("oidc.issuers: alias must be non-empty")
+		}
+		iss := strings.TrimSpace(cfg.Issuer)
+		aud := strings.TrimSpace(cfg.Audience)
+		jwks := strings.TrimSpace(cfg.JWKSURL)
+		if iss == "" {
+			return fmt.Errorf("oidc.issuers.%s.issuer is required", a)
+		}
+		if aud == "" {
+			return fmt.Errorf("oidc.issuers.%s.audience is required", a)
+		}
+		if jwks == "" {
+			return fmt.Errorf("oidc.issuers.%s.jwksURL is required", a)
+		}
+		if prev, dup := seenIssuerURLs[iss]; dup {
+			return fmt.Errorf("oidc.issuers: duplicate issuer URL %q (aliases %q and %q)", iss, prev, a)
+		}
+		seenIssuerURLs[iss] = a
 	}
 	return nil
 }
@@ -106,6 +233,8 @@ type AuthzDecision struct {
 // Authorize checks whether claims may resolve capability. Fail closed.
 // Capability identifiers are case-sensitive exact matches after TrimSpace.
 // Repo comparison uses normalizeRepoIdentity (scheme+host lowercased; path case preserved).
+//
+// Legacy mode matches subject only. Multi-issuer mode matches issuer alias + subject.
 func (p *PolicyFile) Authorize(claims Claims, capability string) AuthzDecision {
 	capability = strings.TrimSpace(capability)
 	dec := AuthzDecision{Subject: claims.Subject, Capability: capability}
@@ -118,15 +247,30 @@ func (p *PolicyFile) Authorize(claims Claims, capability string) AuthzDecision {
 		return dec
 	}
 
+	multi := p.MultiIssuer()
+	if multi && strings.TrimSpace(claims.IssuerAlias) == "" {
+		dec.Reason = "token issuer alias is empty"
+		return dec
+	}
+
 	var matched *PolicyRule
 	for i := range p.Policies {
-		if strings.TrimSpace(p.Policies[i].Subject) == claims.Subject {
-			matched = &p.Policies[i]
-			break
+		rule := &p.Policies[i]
+		if strings.TrimSpace(rule.Subject) != claims.Subject {
+			continue
 		}
+		if multi && strings.TrimSpace(rule.Issuer) != strings.TrimSpace(claims.IssuerAlias) {
+			continue
+		}
+		matched = rule
+		break
 	}
 	if matched == nil {
-		dec.Reason = "subject not authorized"
+		if multi {
+			dec.Reason = "issuer+subject not authorized"
+		} else {
+			dec.Reason = "subject not authorized"
+		}
 		return dec
 	}
 	if !containsExact(matched.Capabilities, capability) {

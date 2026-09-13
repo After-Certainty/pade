@@ -117,9 +117,11 @@ workload authentication mechanism
 
 The broker MAY support different workload identity technologies over time.
 
-**Current reference adapter:** Cursor OIDC JWTs verified with configured issuer, audience, and JWKS (default JWKS URL when omitted in policy: `https://api.cursor.com/keys`). Verification expectations in the spike include signature/algorithm checks, required `exp`, a maximum remaining lifetime ceiling, and time skew handling as implemented in `internal/broker`. Remote JWKS URLs must use HTTPS (loopback HTTP only for local tests).
+**Current reference adapters:** Cursor OIDC and Google/GCE workload identity JWTs verified against an explicitly configured trusted-issuer set (legacy single-issuer form still supported). Legacy Cursor policies may omit `jwksURL` (default `https://api.cursor.com/keys`); multi-issuer policies require an explicit `jwksURL` per issuer and unique issuer URLs. Verification expectations in the spike include signature/algorithm checks, required `exp`, a maximum remaining lifetime ceiling, and time skew handling as implemented in `internal/broker`. Remote JWKS URLs must use HTTPS (loopback HTTP only for local tests). There is no OIDC discovery — unverified JWT `iss` is only a lookup key into static operator config.
 
-Cursor OIDC is **not** a normative PADE-wide identity requirement. Audience binding is part of the reference dogfood; see [../docs/cursor-oidc-broker-dogfood.md](../docs/cursor-oidc-broker-dogfood.md).
+Authorization in multi-issuer mode matches **trusted issuer alias + subject** (never subject alone across issuers). Legacy single-issuer policies continue to match subject only.
+
+These adapters are **not** a normative PADE-wide identity requirement. See [../docs/cursor-oidc-broker-dogfood.md](../docs/cursor-oidc-broker-dogfood.md) and [../docs/gce-multi-issuer-dogfood.md](../docs/gce-multi-issuer-dogfood.md).
 
 Deferred in the spike (not specified here as required): JTI replay stores, multi-tenant hosting.
 
@@ -129,7 +131,8 @@ Server-owned policy (YAML in the reference impl) is **not** portable Intent. Unk
 
 Reference policy model (`PolicyRule` semantics):
 
-- Match **exact** token `subject` (duplicate subjects in a policy file are rejected at load).
+- **Legacy single-issuer policies:** match **exact** token `subject` (duplicate subjects rejected at load).
+- **Multi-issuer policies:** match **trusted issuer alias + subject** (every rule must name an issuer alias; duplicates are on `(issuer, subject)`; the same subject string under two issuers remains distinct). A Google token cannot satisfy a Cursor-only subject rule.
 - Capability identifiers are **case-sensitive exact** matches after `TrimSpace`. Request capability, policy allowlist entry, and bindings map key must use the same string.
 - Optional repository confinement: when `requireRepoURLs` is true, require non-empty complete `repo_urls` attestation and **exact set equality** against the rule’s repository list. The reference normalizes repo identities by lowercasing **scheme and hostname only**, preserving path case, trimming one trailing `.git`, and stripping userinfo/query/fragment for comparison and logging. Opaque `host/path` forms lowercase the host segment only.
 - Do **not** treat a sole `repo_url` claim as sufficient for single-repo confinement.
