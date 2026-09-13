@@ -121,7 +121,9 @@ spec:
 EOF
 
 echo "starting multi-issuer broker on ${LISTEN}..."
-export PADE_GCE_DOGFOOD=ok
+# Nontrivial material value. The child must verify it in-process; do not echo it
+# (pade exec redacts exact resolved material values from stdout).
+export PADE_GCE_DOGFOOD=dogfood-pass
 "$BROKER" -policy "$POLICY" -bindings "$BINDINGS_SERVER" -listen "$LISTEN" \
   >"$WORKDIR/broker.log" 2>&1 &
 BROKER_PID=$!
@@ -140,14 +142,26 @@ done
 curl -sf "http://${LISTEN}/healthz" >/dev/null || die "broker healthz not ready"
 
 echo "resolving ${CAPABILITY} via broker.identity=gce..."
+# Verify material internally; print only a non-secret success marker (never the
+# material value — redaction would turn it into [REDACTED] and break assertions).
 out="$(
   "$PADE" exec \
     -f "$MANIFEST" \
     --bindings "$BINDINGS_CONSUMER" \
     --capability "$CAPABILITY" \
     --quiet \
-    -- /bin/sh -c 'test "$PADE_GCE_DOGFOOD" = "ok" && printf "gce-multi-issuer-dogfood: ok\n"'
+    -- /bin/sh -c '
+      if [ -z "${PADE_GCE_DOGFOOD:-}" ]; then
+        echo "gce-multi-issuer-dogfood: missing material" >&2
+        exit 1
+      fi
+      if [ "$PADE_GCE_DOGFOOD" != "dogfood-pass" ]; then
+        echo "gce-multi-issuer-dogfood: unexpected material" >&2
+        exit 1
+      fi
+      printf "gce-multi-issuer-dogfood: success\n"
+    '
 )"
-test "$out" = "gce-multi-issuer-dogfood: ok" || die "exec failed: $out"
+test "$out" = "gce-multi-issuer-dogfood: success" || die "exec failed: $out"
 
 echo "Experiment 005C dogfood succeeded (JWT never printed)."
