@@ -219,8 +219,10 @@ printf '{"env":{"DEMO_TOKEN":"ok"},"expiresAt":"2099-01-01T00:00:00Z"}'
 		Exec:     &binding.ExecBinding{Command: []string{script}},
 	}
 	ctx := binding.WithVerifiedIdentity(context.Background(), binding.VerifiedIdentity{
-		Subject: "user:42",
-		IDToken: "header.payload.sig",
+		Issuer:      "https://accounts.google.com",
+		IssuerAlias: "google",
+		Subject:     "user:42",
+		IDToken:     "header.payload.sig",
 	})
 	mat, err := New().Resolve(ctx, "demo.derived", b)
 	if err != nil {
@@ -237,8 +239,10 @@ printf '{"env":{"DEMO_TOKEN":"ok"},"expiresAt":"2099-01-01T00:00:00Z"}'
 		Capability string `json:"capability"`
 		Operation  string `json:"operation"`
 		Identity   *struct {
-			Subject string `json:"subject"`
-			IDToken string `json:"idToken"`
+			Issuer      string `json:"issuer"`
+			IssuerAlias string `json:"issuerAlias"`
+			Subject     string `json:"subject"`
+			IDToken     string `json:"idToken"`
 		} `json:"identity"`
 	}
 	if err := json.Unmarshal(raw, &req); err != nil {
@@ -252,6 +256,9 @@ printf '{"env":{"DEMO_TOKEN":"ok"},"expiresAt":"2099-01-01T00:00:00Z"}'
 	}
 	if req.Identity.Subject != "user:42" || req.Identity.IDToken != "header.payload.sig" {
 		t.Fatalf("identity=%+v", req.Identity)
+	}
+	if req.Identity.Issuer != "https://accounts.google.com" || req.Identity.IssuerAlias != "google" {
+		t.Fatalf("identity issuer fields=%+v", req.Identity)
 	}
 }
 

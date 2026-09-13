@@ -1033,7 +1033,7 @@ Explicitly deferred (not blockers for `v0.1.0` unless noted otherwise):
 - Extra provider bindings beyond the first dogfood binding
 - Provider packaging / distribution choices beyond what dogfood needs
 - Capability registry / standardized capability naming
-- Additional workload identity adapters (beyond Cursor OIDC reference)
+- Additional workload identity adapters beyond Cursor OIDC + GCE metadata (AWS, Kubernetes, SPIFFE, etc.)
 - Codex / Claude (or other agent runtime) support as PADE features
 - Managed broker products
 - PADE website

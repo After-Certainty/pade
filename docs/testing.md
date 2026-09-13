@@ -91,6 +91,7 @@ Broker security posture: [broker-auth-security.md](broker-auth-security.md).
 | Change area | Unit tests | Dogfood / smoke |
 |-------------|------------|-----------------|
 | `internal/identity/cursor` | `go test ./internal/identity/cursor/...` | `mise run dogfood-identity`, `mise run dogfood-broker-stage-b` (live; Cloud Agent) |
+| `mise run dogfood-gce-multi-issuer` | Real GCE metadata identity + multi-issuer local broker | **No** — GCE VM / Coder-on-GCE |
 
 ## Live / manual targets (not CI)
 

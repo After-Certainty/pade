@@ -68,8 +68,12 @@ type KeeperSecretsManagerBinding struct {
 }
 
 // BrokerBinding resolves a capability through a remote PADE broker using
-// Cursor workload identity. Endpoint and audience are runtime/org config —
-// never portable pade.yaml fields.
+// workload identity. Endpoint and audience are runtime/org config — never
+// portable pade.yaml fields.
+//
+// Identity selects the Consumer TokenSource: omit or "cursor" (default), or
+// "gce" for Compute Engine metadata identity. This is not broker OIDC config
+// and not portable Intent.
 type BrokerBinding struct {
 	Endpoint string `yaml:"endpoint" json:"endpoint"`
 	Audience string `yaml:"audience" json:"audience"`

@@ -91,6 +91,8 @@ The reference Broker invokes `command` with:
   "operation": "resolve",
   "config": { },
   "identity": {
+    "issuer": "https://accounts.google.com",
+    "issuerAlias": "google",
     "subject": "user:42",
     "idToken": "<exact bearer JWT the client presented>"
   }
@@ -110,6 +112,10 @@ When `identity` is present:
 |-------|----------|-------|
 | `identity.idToken` | **yes** | Exact OIDC JWT string the client presented (for downstream federation such as STS `subject_token`). Not a newly minted token; claims are not stripped. |
 | `identity.subject` | recommended | Broker-verified JWT `sub`; must equal the token’s `sub` when both are set |
+| `identity.issuer` | optional | Verified issuer URL from the trusted verifier that accepted the token |
+| `identity.issuerAlias` | optional | Operator-configured trusted-issuer alias (empty for legacy single-issuer policies) |
+
+`issuer` / `issuerAlias` are additive optional fields so trusted providers need not decode the JWT to recover the identity namespace. They are set only after successful broker verification — never from an unverified peek. Older providers that ignore unknown fields remain compatible.
 
 Rules:
 

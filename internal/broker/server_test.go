@@ -492,7 +492,11 @@ func TestResolveTimeoutCancelsHangingProvider(t *testing.T) {
 
 	hp := &hangProvider{started: make(chan struct{}, 1)}
 	srv, tok := testBrokerFixture(t, key, jwks.URL, binding.NewRegistry(hp), "demo.hang", 4, 200*time.Millisecond)
-	srv.Verifier.HTTPDo = jwks.Client().Do
+	if v, ok := srv.Verifier.(*broker.Verifier); ok {
+		v.HTTPDo = jwks.Client().Do
+	} else {
+		t.Fatal("expected *Verifier")
+	}
 	hs := httptest.NewServer(srv.Handler())
 	t.Cleanup(hs.Close)
 
@@ -520,7 +524,11 @@ func TestResolveConcurrencyBusy(t *testing.T) {
 
 	hp := &hangProvider{started: make(chan struct{}, 8)}
 	srv, tok := testBrokerFixture(t, key, jwks.URL, binding.NewRegistry(hp), "demo.hang", 2, 2*time.Second)
-	srv.Verifier.HTTPDo = jwks.Client().Do
+	if v, ok := srv.Verifier.(*broker.Verifier); ok {
+		v.HTTPDo = jwks.Client().Do
+	} else {
+		t.Fatal("expected *Verifier")
+	}
 	hs := httptest.NewServer(srv.Handler())
 	t.Cleanup(hs.Close)
 

@@ -1,0 +1,35 @@
+# Example multi-issuer pade-broker policy (server-owned — not portable pade.yaml).
+#
+# One broker process trusts both Cursor Cloud Agent OIDC and Google/GCE
+# workload identity. Operator-owned aliases (cursor, google) are local to this
+# policy — they are not portable Intent and are not Consumer broker.identity.
+#
+# Replace YOUR-* placeholders before deploy. Do not commit real broker URLs,
+# subjects, or credentials.
+
+version: "0.1"
+
+oidc:
+  issuers:
+    cursor:
+      issuer: https://api.cursor.com
+      audience: https://YOUR-BROKER
+      jwksURL: https://api.cursor.com/keys
+
+    google:
+      issuer: https://accounts.google.com
+      audience: https://YOUR-BROKER
+      jwksURL: https://www.googleapis.com/oauth2/v3/certs
+
+policies:
+  - issuer: cursor
+    subject: "user:YOUR_CURSOR_SUBJECT"
+    requireRepoURLs: false
+    capabilities:
+      - github.user.read
+
+  - issuer: google
+    subject: "YOUR_GCE_SERVICE_ACCOUNT_SUB"
+    requireRepoURLs: false
+    capabilities:
+      - experiment.gce.identity

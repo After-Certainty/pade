@@ -80,8 +80,8 @@ func (c *Config) Validate() error {
 				return fmt.Errorf("binding %q: broker.audience is required", name)
 			}
 			id := strings.TrimSpace(b.Broker.Identity)
-			if id != "" && id != "cursor" {
-				return fmt.Errorf("binding %q: unsupported broker.identity %q (want cursor)", name, id)
+			if id != "" && id != "cursor" && id != "gce" {
+				return fmt.Errorf("binding %q: unsupported broker.identity %q (want cursor or gce)", name, id)
 			}
 		case "exec":
 			if b.Exec == nil {

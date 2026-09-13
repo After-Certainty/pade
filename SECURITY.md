@@ -173,14 +173,14 @@ Use a narrowly scoped Keeper Secrets Manager Application so possession of `KSM_C
 
 Keeper Secrets Manager is one **reference materialization provider**. It is not part of the portable Intent Specification.
 
-## Phase 2 — Cursor OIDC broker mode
+## Phase 2 — OIDC broker mode (Cursor + multi-issuer)
 
 **Stage 1 (direct materialization):**
 
 ```text
 agent VM has no KSM_CONFIG (broker mode)
-→ workload mints Cursor OIDC identity (local socket)
-→ pade-broker verifies JWT + server-side policy
+→ workload mints OIDC identity (Cursor socket or GCE metadata)
+→ pade-broker verifies JWT against trusted issuer set + server-side policy
 → broker materializes via KSM / env / Vault / … (reference adapters)
 → env Material returns to the agent
 ```
@@ -195,18 +195,20 @@ agent VM has no durable vendor keys
 → only derived env Material returns to the agent
 ```
 
-See [docs/provider-contract.md](docs/provider-contract.md) and [docs/cursor-oidc-broker-dogfood.md](docs/cursor-oidc-broker-dogfood.md). **`provider: exec` is broker-side only** — the Consumer rejects development-side exec bindings even when workspace bindings are trusted.
+See [docs/provider-contract.md](docs/provider-contract.md), [docs/cursor-oidc-broker-dogfood.md](docs/cursor-oidc-broker-dogfood.md), and [docs/gce-multi-issuer-dogfood.md](docs/gce-multi-issuer-dogfood.md). **`provider: exec` is broker-side only** — the Consumer rejects development-side exec bindings even when workspace bindings are trusted.
 
 Important distinctions:
 
-- Cursor OIDC authenticates the **Cloud Agent workload**, not an individual subprocess. It is one workload-identity adapter used by the reference Consumer/Broker dogfood—not a mandatory PADE identity mechanism.
-- Any process able to reach Cursor’s local identity socket can mint an identity token for that workload.
+- Workload OIDC authenticates the **runtime workload** (Cursor Cloud Agent or GCE service account), not an individual subprocess. These are reference adapters—not a mandatory PADE identity mechanism. Coder is not an IdP on the GCE path.
+- `broker.identity` (`cursor` / `gce`) selects the Consumer TokenSource; `oidc.issuers` configures broker trusted issuers. They are related operationally but are not the same schema.
+- Multi-issuer authorization matches **issuer alias + subject**. Subject strings are not globally unique across issuers.
+- Any process able to reach Cursor’s local identity socket (or the GCE metadata server from the VM) can mint an identity token for that workload.
 - The security boundary for capability resolution therefore lives at **broker authorization**.
 - A capability name in `pade.yaml` is a **request**, not authorization. The broker must not trust capability names merely because a client asks or a repo declares them.
 - For single-repo confinement, require complete `repo_urls` attestation. Missing `repo_urls` means unknown, not single-repo. Do not authorize from `repo_url` alone. Managed Cloud Agents have been observed with `repo_url` but without `repo_urls`; until complete attestation exists, broker dogfood uses subject + capability (`requireRepoURLs: false`) rather than weakening policy to trust `repo_url`. Policy YAML must set `requireRepoURLs` explicitly; typos/omission fail closed.
-- Broker logs must contain identity/capability decision metadata only — never JWTs or resolved credentials. Repo URLs in authz logs are sanitized to canonical host/path form (no userinfo/query/fragment).
+- Broker logs must contain identity/capability decision metadata only (`issuer=<alias>`, subject, capability) — never JWTs or resolved credentials. Repo URLs in authz logs are sanitized to canonical host/path form (no userinfo/query/fragment).
 - JWT expiration is mandatory. JTI replay tracking remains deferred; this spike relies on short-lived tokens, a 24h maximum remaining lifetime ceiling, and exact audience binding.
-- Reference JWT/JWKS verification posture: [docs/broker-auth-security.md](docs/broker-auth-security.md).
+- Reference JWT/JWKS verification posture: [docs/broker-auth-security.md](docs/broker-auth-security.md). No OIDC discovery; JWKS URLs are operator-configured only.
 - The PADE contract still does not replace resource-level authorization (GitHub, IAM, databases, etc.).
 
 ### Broker transport modes

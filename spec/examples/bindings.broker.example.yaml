@@ -9,4 +9,4 @@ capabilities:
     broker:
       endpoint: "http://127.0.0.1:8787"
       audience: "https://pade-broker.local"
-      # identity defaults to cursor
+      # identity defaults to cursor; set identity: gce on GCE (Compute Engine metadata)

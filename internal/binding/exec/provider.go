@@ -75,8 +75,10 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 }
 
 type identityPayload struct {
-	Subject string `json:"subject,omitempty"`
-	IDToken string `json:"idToken"`
+	Issuer      string `json:"issuer,omitempty"`
+	IssuerAlias string `json:"issuerAlias,omitempty"`
+	Subject     string `json:"subject,omitempty"`
+	IDToken     string `json:"idToken"`
 }
 
 type request struct {
@@ -127,8 +129,10 @@ func (p *Provider) invoke(ctx context.Context, capability, operation string, eb 
 	}
 	if id, ok := binding.VerifiedIdentityFrom(ctx); ok {
 		req.Identity = &identityPayload{
-			Subject: id.Subject,
-			IDToken: id.IDToken,
+			Issuer:      id.Issuer,
+			IssuerAlias: id.IssuerAlias,
+			Subject:     id.Subject,
+			IDToken:     id.IDToken,
 		}
 	}
 	payload, err := json.Marshal(req)
