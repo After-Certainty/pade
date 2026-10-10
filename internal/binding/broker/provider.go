@@ -114,7 +114,8 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 		return nil, fmt.Errorf("broker resolve denied (http %d)", resp.StatusCode)
 	}
 	var out struct {
-		Env map[string]string `json:"env"`
+		Env       map[string]string `json:"env"`
+		ExpiresAt *time.Time        `json:"expiresAt,omitempty"`
 	}
 	if err := json.Unmarshal(raw, &out); err != nil {
 		return nil, fmt.Errorf("broker resolve returned invalid JSON")
@@ -122,7 +123,11 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 	if len(out.Env) == 0 {
 		return nil, fmt.Errorf("broker resolve returned empty env")
 	}
-	return &binding.Material{Provider: p.Name(), Env: out.Env}, nil
+	mat := &binding.Material{Provider: p.Name(), Env: out.Env, ExpiresAt: out.ExpiresAt}
+	if err := mat.Validate(); err != nil {
+		return nil, fmt.Errorf("broker resolve returned invalid material")
+	}
+	return mat, nil
 }
 
 func tokenSourceForIdentity(raw string) (identity.TokenSource, error) {

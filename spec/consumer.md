@@ -109,7 +109,7 @@ The broker MAY materialize authorized capabilities through:
 - **Direct materialization adapters** (env, Vault, Keeper Secrets Manager, …) — stage-1 baseline; durable credentials may pass through unchanged when derivation is unavailable.
 - **External providers** (reference binding: broker-side `provider: exec` invoking independently packaged binaries such as those under [`examples/providers/`](../examples/providers/)) — stage-2 derived credentials; durable authority stays on the broker host.
 
-The Consumer receives the same shape either way: today an **env map** over the experimental HTTP `/v1/resolve` response. Expiry metadata may exist inside broker-side provider protocols but is **not** yet on the Consumer-visible broker wire. See [broker.md](broker.md#resolve-response-success).
+The Consumer receives an **env map** with optional RFC3339 `expiresAt` over the experimental HTTP `/v1/resolve` response. It preserves that metadata and rejects known-expired material before injection, including material that expired while another capability resolved. Missing metadata means unknown lifetime. Long-running children are not automatically renewed or stopped at expiry; downstream systems enforce actual expiration. See [broker.md](broker.md#resolve-response-success).
 
 Current Cursor Cloud dogfood (reference spike):
 

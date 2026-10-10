@@ -188,6 +188,6 @@ Dogfood runs through the broker:
 DevelopmentSession → Consumer (provider: broker) → Broker → exec adapter → trusted provider binary → Material
 ```
 
-**Wire note:** Exec providers may return `expiresAt` in their subprocess JSON. The reference broker HTTP `/v1/resolve` response exposes **`env` only today**—expiry is not yet on the Consumer-visible wire. See [spec/broker.md](../spec/broker.md#resolve-response-success).
+**Wire note:** Exec providers may return `expiresAt` in their subprocess JSON. The reference broker preserves it as an optional HTTP response field, and the Consumer preserves and validates it before injection. Absent metadata remains supported; known-expired material fails resolution. This is metadata, not a revocable lease or renewal protocol. See [spec/broker.md](../spec/broker.md#resolve-response-success).
 
 Milestone G proves GitHub + Google on the same **semantic** seam without vendor fields in PADE core. If a future vendor forces new **normative** core fields, revisit this contract rather than leaking vendor semantics into PADE.

@@ -3,6 +3,7 @@ package broker_test
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -133,5 +134,34 @@ capabilities:
 `), "bindings.yaml")
 	if err == nil || !strings.Contains(err.Error(), "insecure http") {
 		t.Fatalf("err=%v", err)
+	}
+}
+
+func TestBrokerExpirationResponses(t *testing.T) {
+	for _, tc := range []struct {
+		name, extra string
+		valid       bool
+	}{
+		{"legacy absent", "", true}, {"null", `,"expiresAt":null`, true},
+		{"future", `,"expiresAt":"2099-01-01T00:00:00Z"`, true},
+		{"expired", `,"expiresAt":"2000-01-01T00:00:00Z"`, false},
+		{"malformed", `,"expiresAt":"synthetic-sensitive-value"`, false},
+		{"wrong type", `,"expiresAt":123`, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := &brokerprovider.Provider{TokenSource: staticToken{tok: identity.Token{Value: "synthetic-assertion"}}, HTTPDo: func(*http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"env":{"TOKEN":"synthetic"}` + tc.extra + `}`))}, nil
+			}}
+			mat, err := p.Resolve(context.Background(), "demo", binding.CapabilityBinding{Broker: &binding.BrokerBinding{Endpoint: "https://broker.example.invalid", Audience: "demo"}})
+			if (err == nil) != tc.valid {
+				t.Fatal("unexpected response acceptance")
+			}
+			if err != nil && strings.Contains(err.Error(), "synthetic-sensitive-value") {
+				t.Fatal("parser exposed response data")
+			}
+			if !tc.valid && mat != nil {
+				t.Fatal("invalid material returned")
+			}
+		})
 	}
 }

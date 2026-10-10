@@ -67,7 +67,8 @@ func (p *Provider) Resolve(ctx context.Context, name string, b binding.Capabilit
 	if ts := strings.TrimSpace(resp.ExpiresAt); ts != "" {
 		t, err := time.Parse(time.RFC3339, ts)
 		if err != nil {
-			return nil, fmt.Errorf("exec provider expiresAt: %w", err)
+			// Parse errors can echo untrusted provider output, including secrets.
+			return nil, fmt.Errorf("exec provider expiresAt must be RFC3339")
 		}
 		mat.ExpiresAt = &t
 	}

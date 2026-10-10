@@ -1069,3 +1069,11 @@ The following learning milestones are **complete or spiked** and are not the liv
 | **9b** | Cursor OIDC + minimal `pade-broker` — **experimental reference Broker** |
 
 Earlier README “9+ / Later” rows, the release-first A–I ordering, the GA-first A–M ordering (PR #31), and the post-`v0.1.0` Cloudflare/Endpoint L–O ordering are **superseded** by Milestones **A–O** in this document (GitHub App first, Google Analytics second, both before `v0.1.0`; post-release external CLI + WIF experiments).
+
+## October 2026 expiration evidence
+
+The security investigation reproduced provider expiry being dropped on the broker
+wire and known-expired material being accepted for injection. The narrow generic
+seam is optional `expiresAt` propagation and rejection before injection; see
+[material expiration evidence](docs/material-expiration.md). This does not open
+auto-renewal, Grant/Lease, or mediated execution work.
