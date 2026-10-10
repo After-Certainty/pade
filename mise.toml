@@ -5,7 +5,7 @@
 # Do not use mise run -j N on ci-* or dogfoods.
 
 [tools]
-go = "1.26.6"
+go = "1.26.9"
 
 [settings]
 # Cap parallel task workers (mise default is 4). Keeps multi-task and depends
@@ -52,12 +52,12 @@ run = "go mod verify"
 
 [tasks.staticcheck]
 description = "staticcheck v0.6.1 via go run"
-env = { GOTOOLCHAIN = "go1.26.6" }
+env = { GOTOOLCHAIN = "go1.26.9" }
 run = "go run honnef.co/go/tools/cmd/staticcheck@v0.6.1 ./..."
 
 [tasks.govulncheck]
 description = "govulncheck v1.7.0 via go run"
-env = { GOTOOLCHAIN = "go1.26.6" }
+env = { GOTOOLCHAIN = "go1.26.9" }
 run = "go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 ./..."
 
 [tasks.build]

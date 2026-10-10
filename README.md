@@ -80,10 +80,10 @@ GitHub repository: [`After-Certainty/pade`](https://github.com/After-Certainty/p
 
 ## Quick start
 
-Requires **Go 1.22+** (primary toolchain **Go 1.26.6**). Install [mise](https://mise.jdx.dev/) for toolchain + task management:
+Requires **Go 1.22+** (primary toolchain **Go 1.26.9**). Install [mise](https://mise.jdx.dev/) for toolchain + task management:
 
 ```bash
-mise install          # Go 1.26.6 from mise.toml / mise.lock
+mise install          # Go 1.26.9 from mise.toml / mise.lock
 mise tasks            # discover developer tasks
 mise run test
 mise run validate
