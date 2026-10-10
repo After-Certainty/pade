@@ -60,7 +60,7 @@ type Material struct {
 	Provider string
 	Env      map[string]string
 	// ExpiresAt is optional lifetime metadata for derived credentials.
-	// Callers must not treat a nil/zero value as "never expires" for all providers.
+	// Nil means unknown lifetime; a present timestamp must be in the future.
 	ExpiresAt *time.Time
 }
 

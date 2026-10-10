@@ -45,7 +45,8 @@ type resolveRequest struct {
 }
 
 type resolveResponse struct {
-	Env map[string]string `json:"env"`
+	Env       map[string]string `json:"env"`
+	ExpiresAt *time.Time        `json:"expiresAt,omitempty"`
 }
 
 type errorResponse struct {
@@ -194,7 +195,7 @@ func (s *Server) handleResolve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Pragma", "no-cache")
-	_ = json.NewEncoder(w).Encode(resolveResponse{Env: env})
+	_ = json.NewEncoder(w).Encode(resolveResponse{Env: env, ExpiresAt: results[0].Material.ExpiresAt})
 }
 
 func issuerLog(c Claims) string {

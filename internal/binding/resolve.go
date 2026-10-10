@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 )
 
 const (
@@ -44,6 +45,16 @@ func (m *Material) Validate() error {
 		if total > materialMaxTotalBytes {
 			return fmt.Errorf("material env exceeds total size limit")
 		}
+	}
+	return m.ValidateExpiration(time.Now())
+}
+
+// ValidateExpiration checks optional provider lifetime metadata at a caller's
+// clock. Absence means unknown, not unlimited lifetime. This does not revoke
+// credentials, renew them, or guarantee validity throughout child execution.
+func (m *Material) ValidateExpiration(now time.Time) error {
+	if m != nil && m.ExpiresAt != nil && !m.ExpiresAt.After(now) {
+		return fmt.Errorf("material has expired")
 	}
 	return nil
 }
@@ -125,6 +136,10 @@ func MergeEnv(base []string, results []ResolveResult) ([]string, error) {
 	for _, r := range results {
 		if r.Material == nil {
 			continue
+		}
+		// An earlier capability can expire while later capabilities resolve.
+		if err := r.Material.ValidateExpiration(time.Now()); err != nil {
+			return nil, err
 		}
 		for k, v := range r.Material.Env {
 			if prev, ok := fromMaterial[k]; ok && prev != v {

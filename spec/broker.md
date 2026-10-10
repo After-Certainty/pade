@@ -83,10 +83,27 @@ The reference broker exposes a minimal HTTP API. **Protocol status: Experimental
 ### Resolve response (success)
 
 ```json
-{ "env": { "<NAME>": "<value>", "...": "..." } }
+{ "env": { "<NAME>": "<value>" }, "expiresAt": "2099-01-01T00:00:00Z" }
 ```
 
-Today’s result shape is env-map **material**, matching the reference Consumer’s process injection model. This is not a generalized grant/lease object. **`expiresAt`** and other expiry metadata may appear in the broker-side exec provider subprocess protocol and internal reference `Material`, but are **not** yet fields on this HTTP response—see open questions in [README.md](README.md) and [../docs/provider-contract.md](../docs/provider-contract.md).
+The result is env-map **material**, not a grant/lease. `expiresAt` is an optional
+RFC3339 timestamp copied from the provider's material metadata. Omission (or null
+when reading an older/third-party response) means lifetime is unknown, not
+unlimited. An explicitly present zero/past timestamp is expired; malformed
+non-null values fail decoding. The reference broker rejects known-expired material
+with `502 resolve_failed`; the reference Consumer preserves expiry and rejects
+known-expired material before child environment injection.
+
+New Consumers accept old env-only brokers; the existing env-only Go Consumer
+ignores the additive member. Third-party strict JSON decoders may need an update.
+Check deployed Consumer compatibility before rolling out this experimental wire
+addition. An old broker still drops metadata, so newer Consumers cannot recover it.
+
+A strictly future timestamp is accepted without a minimum-lifetime buffer. Clock
+accuracy matters. Checks cannot guarantee validity throughout a long-running
+child, renew credentials, revoke copies, or prevent assertion replay. Downstream
+systems enforce actual credential expiration. No renewal or lease protocol is
+introduced. See [expiration evidence](../docs/material-expiration.md).
 
 ### Errors
 

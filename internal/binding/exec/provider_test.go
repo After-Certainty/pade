@@ -296,3 +296,16 @@ printf '{"status":"available"}'
 		t.Fatalf("identity must be omitted when absent: %s", raw)
 	}
 }
+
+func TestMalformedExpirationDoesNotEchoProviderOutput(t *testing.T) {
+	const synthetic = "synthetic-secret-in-expiry-field"
+	_, err := New().Resolve(context.Background(), "demo", binding.CapabilityBinding{
+		Provider: "exec", Exec: &binding.ExecBinding{Command: []string{"/bin/sh", "-c", `printf '%s' '{"env":{"TOKEN":"synthetic"},"expiresAt":"synthetic-secret-in-expiry-field"}'`}},
+	})
+	if err == nil {
+		t.Fatal("malformed expiration accepted")
+	}
+	if strings.Contains(err.Error(), synthetic) {
+		t.Fatal("expiration parser exposed provider output")
+	}
+}
