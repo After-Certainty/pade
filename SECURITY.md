@@ -151,12 +151,12 @@ The pre-release **two-provider architectural test** validates that this derivati
 
 ## Process-scoped execution
 
-`pade exec` (reference Consumer) injects resolved material only into the child process. After exit, the reference Consumer clears its in-memory material maps.
+`pade exec` (reference Consumer) injects resolved material only into the child process. After exit, the reference Consumer discards its material-map entries. Partial resolution failures also clear already-obtained maps. This is reference cleanup, not zeroization of Go strings, merged environment copies, redactor buffers, child/descendant memory, or retained traces. Child exit does not revoke a copied credential.
 
 Best-effort behaviors (defense in depth, **not** security boundaries):
 
 - Exact-match redaction of resolved secret values on child stdout/stderr before they reach the caller (helps cloud-agent transcripts). Encoded, transformed, hashed, or substring-altered values are not recognized. A child that possesses a credential can still intentionally exfiltrate it.
-- Providers may omit ambient bootstrap env keys from the child (for example `keeper-secrets-manager` omits `KSM_CONFIG`) after resolution.
+- Providers may omit ambient bootstrap env keys from the child (currently only `keeper-secrets-manager` implements this, omitting `KSM_CONFIG` when selected). The default base environment is otherwise inherited; this is not a global bootstrap-secret filter. Ambient Vault/1Password credentials, unrelated secrets, and development overrides can still propagate. Broker mode does not remove access to runtime identity sockets or metadata servers.
 
 A process that has been given a credential can still observe, transform, encode, or exfiltrate it. Any process that can read ambient bootstrap credentials (for example `KSM_CONFIG`) can also call the secret manager directly, bypassing PADE.
 
@@ -207,7 +207,7 @@ Important distinctions:
 - A capability name in `pade.yaml` is a **request**, not authorization. The broker must not trust capability names merely because a client asks or a repo declares them.
 - For single-repo confinement, require complete `repo_urls` attestation. Missing `repo_urls` means unknown, not single-repo. Do not authorize from `repo_url` alone. Managed Cloud Agents have been observed with `repo_url` but without `repo_urls`; until complete attestation exists, broker dogfood uses subject + capability (`requireRepoURLs: false`) rather than weakening policy to trust `repo_url`. Policy YAML must set `requireRepoURLs` explicitly; typos/omission fail closed.
 - Broker logs must contain identity/capability decision metadata only (`issuer=<alias>`, subject, capability) — never JWTs or resolved credentials. Repo URLs in authz logs are sanitized to canonical host/path form (no userinfo/query/fragment).
-- JWT expiration is mandatory. JTI replay tracking remains deferred; this spike relies on short-lived tokens, a 24h maximum remaining lifetime ceiling, and exact audience binding.
+- JWT expiration is mandatory. Reusing a still-accepted assertion can invoke the provider again and obtain fresh downstream credentials; each request is re-authorized. Previously issued credentials can remain valid after the assertion expires. JTI replay tracking remains deferred; this spike relies on short-lived tokens, a 24h maximum remaining lifetime ceiling, and exact audience binding.
 - Reference JWT/JWKS verification posture: [docs/broker-auth-security.md](docs/broker-auth-security.md). No OIDC discovery; JWKS URLs are operator-configured only.
 - The PADE contract still does not replace resource-level authorization (GitHub, IAM, databases, etc.).
 
@@ -275,3 +275,7 @@ PADE is **experimental** interoperability software. This document describes trus
 PADE does not replace OAuth, OIDC, IAM, SPIFFE, or resource-level authorization. Downstream systems remain authoritative.
 
 CI runs `govulncheck@v1.7.0` (pinned CLI version; vulnerability DB remains dynamic) against the supported Go toolchain, plus GitHub CodeQL (Go) and pull-request dependency review. GitHub Actions (`checkout`, `setup-go`, CodeQL, dependency-review) are pinned to full commit SHAs. As of this hardening pass, `golang.org/x/text@v0.22.0` (indirect via jsonschema) reports [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970); symbol analysis shows PADE code does not call the vulnerable APIs. Bumping `x/text` to a fixed release currently forces a higher `go` language floor than the intentional `go 1.22` compatibility line, so the bump is deferred.
+
+## Investigation evidence
+
+See [the October 2026 boundary investigation](docs/security/2026-10-boundary-investigation.md) for pinned revisions, local reproductions, ownership, residual risks, and separately proposed expiration handling.

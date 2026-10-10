@@ -98,10 +98,10 @@ These rules apply to humans and coding agents:
 
 ## Tests and commands
 
-Requires Go 1.22+ (primary **Go 1.26.6** via [mise](https://mise.jdx.dev/)). Install mise, then:
+Requires Go 1.22+ (primary **Go 1.26.9** via [mise](https://mise.jdx.dev/)). Install mise, then:
 
 ```bash
-mise install          # Go 1.26.6 from mise.toml / mise.lock
+mise install          # Go 1.26.9 from mise.toml / mise.lock
 mise tasks            # discover tasks
 go test ./...
 go run ./cmd/pade validate -f spec/examples/web-app.yaml
@@ -151,7 +151,7 @@ Capability and runtime providers should be adapters behind small interfaces in t
 ## Cursor Cloud specific instructions
 
 - The reference implementation is a Go CLI (`bin/pade`, `bin/pade-broker`); there is no long-running dev server to keep up. "Running the app" means building and invoking the CLI (`mise run build`, then `mise run dogfood` for the quickest end-to-end capability flow).
-- Install [mise](https://mise.jdx.dev/) if it is not already on `PATH`, then `mise install` (Go 1.26.6 from `mise.toml` / `mise.lock`). The base image may already ship Go 1.26.x; prefer `mise run` so the task runner and toolchain stay aligned.
+- Install [mise](https://mise.jdx.dev/) if it is not already on `PATH`, then `mise install` (Go 1.26.9 from `mise.toml` / `mise.lock`). The base image may already ship Go 1.26.x; prefer `mise run` so the task runner and toolchain stay aligned.
 - The startup update script runs `go mod download`. Lint targets fetch their tools on demand at run time (`mise run staticcheck` → `honnef.co/go/tools`, `mise run govulncheck` → `golang.org/x/vuln` via `go run ...@version`), and `mise run ci-smoke`/`mise run dogfood-vault` download a Vault dev binary into `.tools/` on first run — all require network egress the first time they run.
 - Fast local verification mirrors CI: `mise run ci-unit` (fmt, vet, shuffled tests, staticcheck, race, govulncheck, build) and `mise run ci-smoke` (all provider + broker + exec dogfoods). Both pass in this environment without secrets because provider adapters use fake shims / `PADE_KSM_FAKE=1`.
 - Live provider dogfoods (`*-live`, `dogfood-broker-stage-b*`) and `mise run smoke-broker-container` (Docker) are intentionally out of the default flow: they need real credentials, the Cursor OIDC identity socket, or Docker, none of which are provisioned by the update script.

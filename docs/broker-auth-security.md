@@ -51,7 +51,7 @@ These must remain true across changes:
 1. **RS256 only** — no other JWS algorithms accepted.
 2. **Issuer and audience** — must match operator-configured OIDC settings.
 3. **`exp` required** — missing expiration fails closed.
-4. **Maximum token lifetime** — `exp` must not exceed 24 hours plus clock skew (PADE policy on top of library validation).
+4. **Maximum remaining lifetime** — `exp - now` must not exceed 24 hours plus clock skew. This does not constrain total lifetime since `iat` (PADE policy on top of library validation).
 5. **Clock skew** — 30 seconds leeway (configurable via `Verifier.Skew`).
 6. **Subject required** — empty `sub` fails after crypto validation.
 7. **JWKS trust** — keys fetched only from configured URL over allowed transport; duplicate `kid` rejected.
@@ -108,3 +108,9 @@ mise run dogfood-broker
 - mTLS or custom JWT profiles beyond Cursor OIDC dogfood
 
 External security review is reasonable before declaring the broker non-experimental; it is not required for every reference-implementation change.
+
+## Reuse versus replay
+
+The same accepted bearer assertion, including the same `jti`, may resolve more than once and trigger fresh provider issuance. Each request is authenticated and authorized again. This supports legitimate retries and multiple capabilities, but an interceptor can perform the same authorized operations until token acceptance or policy ends. Downstream material may outlive the assertion. Continuing access to the runtime identity source allows minting replacements.
+
+`TestBearerReuseReissuesButCannotEscalate` records this boundary with synthetic signed assertions, fresh fake material, negative authorization cases, and expiration beyond skew. A per-process concurrency cap is not a distributed issuance budget; deployments own that control. See the [investigation](security/2026-10-boundary-investigation.md) for the decision not to add a single-use JTI store.

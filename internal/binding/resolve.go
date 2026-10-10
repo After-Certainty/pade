@@ -72,6 +72,12 @@ func ResolveMaterials(ctx context.Context, reg *Registry, cfg *Config, names []s
 	}
 	seen := map[string]struct{}{}
 	out := make([]ResolveResult, 0, len(names))
+	complete := false
+	defer func() {
+		if !complete {
+			ClearMaterials(out)
+		}
+	}()
 	for _, name := range names {
 		if name == "" {
 			return nil, fmt.Errorf("capability name is empty")
@@ -90,6 +96,9 @@ func ResolveMaterials(ctx context.Context, reg *Registry, cfg *Config, names []s
 			return nil, fmt.Errorf("capability %q: unknown provider %q", name, b.Provider)
 		}
 		mat, err := p.Resolve(ctx, name, b)
+		// Own every returned material, including a partial result accompanying
+		// an error. On failure the caller cannot clean up results it never gets.
+		out = append(out, ResolveResult{Name: name, Provider: b.Provider, Material: mat})
 		if err != nil {
 			// Do not wrap provider errors with secret-bearing context.
 			return nil, fmt.Errorf("capability %q: resolve failed: %w", name, err)
@@ -100,14 +109,10 @@ func ResolveMaterials(ctx context.Context, reg *Registry, cfg *Config, names []s
 		// Do not Probe after a successful Resolve: remote providers (vault,
 		// onepassword, keeper, keeper-secrets-manager) would re-fetch secrets
 		// just to build Meta. Plan/capabilities use InspectBindings and do not probe.
-		out = append(out, ResolveResult{
-			Name:     name,
-			Provider: b.Provider,
-			Material: mat,
-			Meta:     map[string]string{"resolvedValues": "[hidden]"},
-		})
+		out[len(out)-1].Meta = map[string]string{"resolvedValues": "[hidden]"}
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	complete = true
 	return out, nil
 }
 
@@ -132,7 +137,8 @@ func MergeEnv(base []string, results []ResolveResult) ([]string, error) {
 	return mapToEnviron(envMap), nil
 }
 
-// ClearMaterials best-effort zeroes resolved secret maps after use.
+// ClearMaterials discards resolved map entries after use. This is best-effort
+// reference cleanup, not zeroization of Go strings, other copies, or child memory.
 func ClearMaterials(results []ResolveResult) {
 	for i := range results {
 		if results[i].Material == nil {

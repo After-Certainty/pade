@@ -26,11 +26,11 @@ Protocol-affecting changes should be called out in the PR. Prefer documenting ex
 
 ## Development
 
-Requires **Go 1.22+** (primary toolchain **Go 1.26.6** via [mise](https://mise.jdx.dev/)). Older toolchains (for example Homebrew Go 1.13) fail on `embed` and modern module requirements.
+Requires **Go 1.22+** (primary toolchain **Go 1.26.9** via [mise](https://mise.jdx.dev/)). Older toolchains (for example Homebrew Go 1.13) fail on `embed` and modern module requirements.
 
 ```bash
 # Install mise (https://mise.jdx.dev/), then:
-mise install          # Go 1.26.6 from mise.toml / mise.lock
+mise install          # Go 1.26.9 from mise.toml / mise.lock
 mise tasks            # discover tasks
 mise run test
 mise run ci           # local mirror of GitHub unit + smoke jobs (not container/CodeQL/DevPod)
