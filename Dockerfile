@@ -1,7 +1,7 @@
 # Multi-stage build for the pade-broker runtime image only (not the pade CLI).
 # No secrets, policy, or bindings are baked into the image.
 
-FROM golang:1.26-bookworm AS build
+FROM golang:1.26.10-bookworm AS build
 ARG VERSION=dev
 ARG VCS_REF=unknown
 ARG BUILD_TIME=
